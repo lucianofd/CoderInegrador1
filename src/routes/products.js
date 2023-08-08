@@ -12,6 +12,8 @@ productsRouter.post('/', async (req, res) => {
   try {
     const newProduct = req.body;
     await productManager.addProduct(newProduct);
+  // Emitir evento a través de WebSocket
+  io.emit('updateProducts');
     res.status(201).json(newProduct);
   } catch (error) {
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -43,13 +45,22 @@ productsRouter.get('/', async (req, res) => {
   }
 });
 
+// GET para la vista en tiempo real
+productsRouter.get('/realtimeproducts', (req, res) => {
+  const productData = fs.readFileSync('productos.json', 'utf8');
+  const products = JSON.parse(productData);
+  res.render('realTimeProducts', { products });
+});
+
+
 //PUT actualizar un producto por id (pid)
 productsRouter.put('/:pid', async (req, res) => {
     const pid = req.params.pid;
     const updatedProduct = req.body;
     try {
       await productManager.updateProduct(pid, updatedProduct);
-      res.json(updatedProduct);
+      io.emit('updateProducts');
+      res.json('Prodcuto actualizado!');
     } catch (error) {
       res.status(500).json({ error:'Error interno' });
     }
@@ -60,9 +71,10 @@ productsRouter.delete('/:pid', async (req, res) => {
     const pid = req.params.pid;
     try {
       await productManager.deleteProduct(pid);
-      res.json(deleteProduct);
+      io.emit('updateProducts')
+      res.json('Producto eliminado!');
     } catch(error){
-      res.status(500).json({error:'Errir interno'});
+      res.status(500).json({error:'Error interno'});
     }
 });
 

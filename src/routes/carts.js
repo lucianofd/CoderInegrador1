@@ -5,7 +5,7 @@ const cartsRouter = express.Router();
 // POST: Crea un nuevo carrito
 cartsRouter.post('/', (req, res) => {
   const newCart = req.body;
-  newCart.id = Date.now().toString(); // Genera un id único para el carrito
+  newCart.id = Date.now().toString(); //id único para el carrito
   newCart.products = []; // Inicializa el arreglo de productos
   fs.writeFile('carrito.json', JSON.stringify(newCart), (err) => {
     if (err) {
@@ -17,7 +17,7 @@ cartsRouter.post('/', (req, res) => {
   });
 });
 
-// GET: Obtiene productos de un carrito por su id (cid)
+// GET Obtiene productos de un carrito por su id (cid)
 cartsRouter.get('/:cid', (req, res) => {
   const cid = req.params.cid;
   fs.readFile('carrito.json', 'utf8', (err, data) => {
@@ -35,7 +35,7 @@ cartsRouter.get('/:cid', (req, res) => {
   });
 });
 
-// POST: Agregar producto a un carrito por su id (cid) y el id del producto (pid)
+// POST Agregar producto a un carrito por su id (cid) y el id del producto (pid)
 cartsRouter.post('/:cid/product/:pid', async (req, res) => {
   const cid = req.params.cid;
   const pid = req.params.pid;
