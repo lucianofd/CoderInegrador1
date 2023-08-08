@@ -4,7 +4,7 @@ const fs = require('fs');
 const ProductManager = require('../ProductManager');
 
 const productsRouter = express.Router();
-const productManager = new ProductManager('../public/productos.js');
+const productManager = new ProductManager('../public/productos.json');
 
 
 //POST agregar un producto
