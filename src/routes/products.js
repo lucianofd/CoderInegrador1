@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 
-const ProductManager = require('../ProductManager');
+const ProductManager = require('../dao/ProductManager');
 
 const productsRouter = express.Router();
 const productManager = new ProductManager('../public/productos.json');
