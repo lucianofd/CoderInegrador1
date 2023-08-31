@@ -1,38 +1,30 @@
-const express = require('express');
-const fs = require('fs');
+import express from 'express';
+import CartManager from '../dao/CartManager';
+
 const cartsRouter = express.Router();
+const CM = new CartManager();
 
 // POST: Crea un nuevo carrito
-cartsRouter.post('/', (req, res) => {
-  const newCart = req.body;
-  newCart.id = Date.now().toString(); //id único para el carrito
-  newCart.products = []; // Inicializa el arreglo de productos
-  fs.writeFile('carrito.json', JSON.stringify(newCart), (err) => {
-    if (err) {
-      console.error('Error al escribir el archivo carrito.json', err);
-      res.status(500).json({ error: 'Error interno del servidor' });
-    } else {
-      res.status(201).json(newCart);
+cartsRouter.post('/', async (req, res) => {
+
+   const cart = await CM.newCart();
+  
+   if (cart) {
+    res.send({status:"ok", message:"El Carrito se creó correctamente!", id:cart._id});
+   } else {
+    res.status(500).send({status:"error", message:"Error! No se pudo crear el Carrito!"});
     }
-  });
 });
 
 // GET Obtiene productos de un carrito por su id (cid)
-cartsRouter.get('/:cid', (req, res) => {
-  const cid = req.params.cid;
-  fs.readFile('carrito.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error al leer el archivo carrito.json', err);
-      res.status(500).json({ error: 'Error interno del servidor' });
-    } else {
-      const carrito = JSON.parse(data);
-      if (carrito.id === cid) {
-        res.json(carrito.products);
-      } else {
-        res.status(404).json({ error: 'Carrito no encontrado' });
-      }
-    }
-  });
+cartsRouter.get('/:cid', async  (req, res) => {
+  try{ const cid = req.params.cid;
+  const cart = await CM.getCart(cid);
+    res.send({products:cart.products})
+  }catch(error){
+    res.status(400).send({message:"Error! Id no encontrado"})
+  }
+  
 });
 
 // POST Agregar producto a un carrito por su id (cid) y el id del producto (pid)
@@ -40,39 +32,63 @@ cartsRouter.post('/:cid/product/:pid', async (req, res) => {
   const cid = req.params.cid;
   const pid = req.params.pid;
   try {
-    // lee carrito y productos
-    const cartData = await fs.readFile('carrito.json', 'utf8');
-    const cart = JSON.parse(cartData);
     
-    const productData = await fs.readFile('productos.json', 'utf8');
-    const products = JSON.parse(productData);
+    let cartData = await CM.addProductToCart(cid, pid);
+      res.send({message:"Producto agregado"})
     
-    // Encontrar el producto a agregar por su id
-    const productToAdd = products.find(product => product.id === pid);
-    
-    if (!productToAdd) {
-      res.status(404).json({ error: 'Producto no encontrado' });
-      return;
-    }
+    } catch (error) {
 
-     // Verifica si el producto ya está en el carrito
-     const existingProductIndex = cart.products.findIndex(item => item.product === pid);
-     if (existingProductIndex !== -1) {
-       // Incrementa la cantidad si ya existe
-       cart.products[existingProductIndex].quantity++;
-     } else {
-       // Agregar producto al carrito con cantidad 1
-       cart.products.push({ product: pid, quantity: 1 });
+       res.status(500).send({ message:"Error!: " + error });
      }
-     
-     // Actualiza el archivo del carrito
-     await fs.writeFile('carrito.json', JSON.stringify(cart));
-     
-     res.json(cart.products);
-   } catch (error) {
-     console.error('Error al agregar producto al carrito', error);
-     res.status(500).json({ error: 'Error interno del servidor' });
-   }
  });
+
+ cartsRouter.put("/:cid/products/:pid", async (req, res) => {
+  try {
+    const cid = req.params.cid;
+    const pid = req.params.pid;
+    const quantity = req.body.quantity;
+    const result = await CM.updateQuantity(cid, pid, quantity);
+
+    if (result) {
+        res.send({status:"ok", message:"El producto se actualizó correctamente!"});
+    } else {
+        res.status(400).send({status:"error", message:"Error! No se pudo actualizar el Producto del Carrito!"});
+    }
+  } catch (error) {
+    res.status(500).send({status:"error", message:"Error interno del servidor"});
+  }
+});
+
+cartsRouter.delete("/:cid/products/:pid", async (req, res) => {
+  try {
+    const cid = req.params.cid;
+    const pid = req.params.pid;
+    const result = await CM.deleteProduct(cid, pid);
+
+    if (result) {
+        res.send({status:"ok", message:"El producto se eliminó correctamente!"});
+    } else {
+        res.status(400).send({status:"error", message:"Error! No se pudo eliminar el Producto del Carrito!"});
+    }
+  } catch (error) {
+    res.status(500).send({status:"error", message:"Error interno del servidor"});
+  }
+});
+
+cartsRouter.delete("/:cid", async (req, res) => {
+  try {
+    const cid = req.params.cid;
+    const result = await CM.deleteProducts(cid);
+
+    if (result) {
+        res.send({status:"ok", message:"El carrito se vació correctamente!"});
+    } else {
+        res.status(400).send({status:"error", message:"Error! No se pudo vaciar el Carrito!"});
+    }
+  } catch (error) {
+    res.status(500).send({status:"error", message:"Error interno del servidor"});
+  }
+});
+
 
 export default cartsRouter;

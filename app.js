@@ -24,6 +24,8 @@ mongoose.connect(databaseURL);
 
 // Configura Handlebars como motor de plantillas
 app.engine('handlebars', handlebars({defaultLayout: 'main'}));
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 app.set('views',path.join(__dirname) +'/views');
 app.set('view engine', 'handlebars')
 
