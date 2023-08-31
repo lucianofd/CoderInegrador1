@@ -1,7 +1,7 @@
 import express from "express";
 import ProductManager from "../dao/ProductManager.js";
 
-const router = express.Router();
+const viewsRouter = express.Router();
 const PM = new ProductManager();
 
 router.get("/", async (req, res) => {
@@ -30,4 +30,4 @@ router.get("/chat", (req, res) => {
 });
 
 
-export default router;
+export default viewsRouter;

@@ -1,17 +1,26 @@
-const express = require('express');
-const app = express();
-const handlebars = require('express-handlebars');
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import express from "express";
+import __dirname from "./utils.js";
+import expressHandlebars from "express-handlebars";
+import Handlebars from "handlebars";
+import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access';
+//import ProductManager from "./src/dao/ProductManager.js";
+import productsRouter from './src/routes/products.js';
+import cartsRouter from './src/routes/carts.js';
+import viewsRouter from './src/routes/views.js';
+
 const http = require('http');
 const socketIO = require('socket.io');
-const productsRouter = require('./src/routes/products');
-const cartsRouter = require('./src/routes/carts');
-import  ProductManager from './src/dao/ProductManager';
+const path = require('path');
 
+const app = express();
+const PORT = 8080;
 const server = http.createServer(app);
 const io = socketIO(server);
+// Conexión a la base de datos 
+mongoose.connect(databaseURL);
 
-
-const PORT = 8080;
 
 // Configura Handlebars como motor de plantillas
 app.engine('handlebars', handlebars({defaultLayout: 'main'}));
