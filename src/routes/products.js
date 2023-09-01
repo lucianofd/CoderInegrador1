@@ -53,7 +53,6 @@ productsRouter.post('/', async (req, res) => {
   } else {
       res.status(500).send({status:"error", message:"Error! No se pudo agregar el Producto!"});
   }
-    res.status(201).send({message:"Producto agregado!"});
   
 });
 
