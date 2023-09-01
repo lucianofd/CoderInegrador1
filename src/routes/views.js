@@ -4,29 +4,25 @@ import ProductManager from "../dao/ProductManager.js";
 const viewsRouter = express.Router();
 const PM = new ProductManager();
 
-router.get("/", async (req, res) => {
+viewsRouter.get("/", async (req, res) => {
     const products = await PM.getProducts(req.query);
     res.render("home", {products});
 });
 
-router.get("/products", async (req, res) => {
+viewsRouter.get("/products", async (req, res) => {
     const products = await PM.getProducts(req.query);
     res.render("products", {products});
 });
 
-router.get("/products/:pid", async (req, res) => {
+viewsRouter.get("/products/:pid", async (req, res) => {
     const pid = req.params.pid;
     const product = await PM.getProductById(pid);
 
     res.render("product", {product});
 });
 
-router.get("/realtimeproducts", (req, res) => {
+viewsRouter.get("/realtimeproducts", (req, res) => {
     res.render("realTimeProducts");
-});
-
-router.get("/chat", (req, res) => {
-    res.render("chat");
 });
 
 
