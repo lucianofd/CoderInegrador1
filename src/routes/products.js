@@ -10,36 +10,36 @@ productsRouter.post('/', async (req, res) => {
 
   let {title, description, code, price, status, stock, category, thumbnails} = req.body;
     // Validar los campos requeridos
-  if (!product.title){
+  if (!title){
       res.status(400).send({status:"error", message:"Error! No se cargó el campo Title!"});
       return false;
   }
-  if (!product.description){
+  if (!description){
     res.status(400).send({status:"error", message:"Error! No se cargó el campo Description!"});
     return false;
   }
-  if (!product.code){
+  if (!code){
   res.status(400).send({status:"error", message:"Error! No se cargó el campo Code!"});
   return false;
   }
-  if (!product.price){
+  if (!price){
   res.status(400).send({status:"error", message:"Error! No se cargó el campo Price!"});
   return false;
   }
 
   status = !status && true;
 
-  if (!product.stock){
+  if (!stock){
   res.status(400).send({status:"error", message:"Error! No se cargó el campo Stock!"});
   return false;
   }
 
-  if (!product.category){
+  if (!category){
   res.status(400).send({status:"error", message:"Error! No se cargó el campo Category!"});
   return false;
   }
 
-  if (!product.thumbnails){
+  if (!thumbnails){
   res.status(400).send({status:"error", message:"Error! No se cargó el campo Thumbnails!"});
   return false;
   } else if ((!Array.isArray(thumbnails)) || (thumbnails.length == 0)) {
@@ -47,9 +47,8 @@ productsRouter.post('/', async (req, res) => {
   return false;
   }
   
-  let product = req.body({title, description, code, price, stock, category, thumbnails});
-  await PM.addProduct(product);
-    if (result) {
+  let product = await PM.addProduct({title, description, code, price, status, stock, category, thumbnails});
+    if (product) {
       res.send({status:"ok", message:"El Producto se agregó correctamente!"});
   } else {
       res.status(500).send({status:"error", message:"Error! No se pudo agregar el Producto!"});
