@@ -30,14 +30,16 @@ app.listen(PORT, () => {
 // Configura Handlebars como motor de plantillas
 const PM = new ProductManager();
 
-app.set("views", __dirname + "/views");
+app.set("views", __dirname + "/src/views");
 app.engine('handlebars', expressHandlebars.engine({
   handlebars: allowInsecurePrototypeAccess(Handlebars)
 }));
 app.set("view engine", "handlebars");
-app.use(express.json());
+
 app.use(express.urlencoded({extended:true}));
-app.use(express.static(__dirname + "/public"));
+// Especifica la ubicación de las vistas
+//app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(__dirname + "/src/public"));
 // routers de productos y carritos. rutas
 app.use("/api/products/", productsRouter);
 app.use("/api/carts/", cartsRouter);
