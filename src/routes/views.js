@@ -25,5 +25,16 @@ viewsRouter.get("/realtimeproducts", (req, res) => {
     res.render("realTimeProducts");
 });
 
+viewsRouter.get("/cart/:cid", async (req, res) => {
+    const cid = req.params.cid;
+    const cart = await CM.getCart(cid);
+
+    if (cart) {
+        res.render("cart", {products:cart.products});
+    } else {
+        res.status(400).send({status:"error", message:"Error! No se encuentra el ID de Carrito!"});
+    }
+});
+
 
 export default viewsRouter;

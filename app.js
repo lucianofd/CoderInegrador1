@@ -13,14 +13,13 @@ import ProductManager from './src/dao/ProductManager.js';
 import productsRouter from './src/routes/products.js';
 import cartsRouter from './src/routes/carts.js';
 import viewsRouter from './src/routes/views.js';
+import CartManager from './src/dao/CartManager.js';
 
 const app = express();
 const PORT = 8080;
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Conexión a la base de datos 
-//mongoose.connect(databaseURL);
 //servidor
 app.listen(PORT, () => {
   console.log(`Servidor iniciado en el puerto ${PORT}`);
@@ -31,13 +30,14 @@ app.use(express.json());
 
 // Configura Handlebars como motor de plantillas
 const PM = new ProductManager();
+const CM = new CartManager();
 
 app.set("views", __dirname + "/src/views");
 app.engine('handlebars', expressHandlebars.engine({
   handlebars: allowInsecurePrototypeAccess(Handlebars)
 }));
 app.set("view engine", "handlebars");
-
+app.use('../src/public/js', express.static('../src/public/js', { contentType: 'application/javascript' }));
 app.use(express.urlencoded({extended:true}));
 // Especifica la ubicación de las vistas
 //app.set('views', path.join(__dirname, 'views'));
