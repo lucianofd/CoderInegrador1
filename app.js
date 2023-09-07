@@ -25,6 +25,8 @@ const io = new Server(server);
 app.listen(PORT, () => {
   console.log(`Servidor iniciado en el puerto ${PORT}`);
 });
+// Middleware para el manejo de JSON en el body
+app.use(express.json());
 
 
 // Configura Handlebars como motor de plantillas
@@ -45,8 +47,6 @@ app.use("/api/products/", productsRouter);
 app.use("/api/carts/", cartsRouter);
 app.use("/", viewsRouter);
 
-// Middleware para el manejo de JSON en el body
-app.use(express.json());
 
 
 //conexion de socket

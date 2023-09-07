@@ -87,28 +87,31 @@ class ProductManager {
   }
   
   //UPDATE
-  async updateProduct(id, product) {
-    
+  async updateProduct(id, fieldToUpdate, newValue) {
     try {
       if (!this.validateId(id)) {
         throw new Error("ID inválido");
       }
   
-      const existingProduct = await this.getProductById(id);
+      const existingProduct = await productModel.findById(id);
       if (!existingProduct) {
         throw new Error("Producto no encontrado");
       }
+      
+      // Actualiza el campo específico del producto existente
+      existingProduct[fieldToUpdate] = newValue;
   
-      await productModel.updateOne({ _id: id }, product);
-      console.log("Product updated!");
+      // Guarda el cambio en la base de datos
+      await existingProduct.save();
+      console.log("Producto actualizado correctamente");
   
       return true;
     } catch (error) {
-      console.log("Not found!");
-
+      console.log("Error al actualizar el producto:", error.message);
       return false;
     }
-  } 
+  }
+  
   //DELETE
   async deleteProduct(id) {
     try {

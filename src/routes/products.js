@@ -91,15 +91,15 @@ productsRouter.get('/realtimeproducts', (req, res) => {
 
 //PUT actualizar un producto por id (pid)
 productsRouter.put('/:pid', async (req, res) => {
-    const pid = req.params.pid;
-    const updatedProduct = req.body;
-    try {
-      await PM.updateProduct(pid, updatedProduct);
-      res.status(200).send({ message:"El Producto se actualizó correctamente!"});;
-    } catch (error) {
-      res.status(500).send({ error:"Fallo al actualizar prodcuto" });
-    }
-  });
+  const pid = req.params.pid;
+  const updatedProduct = req.body;
+  try {
+    await PM.updateProduct(pid, updatedProduct);
+    res.status(200).send({ message:"El Producto se actualizó correctamente!"});;
+  } catch (error) {
+    res.status(500).send({ error:"Fallo al actualizar prodcuto" });
+  }
+});
 
 // DELETE para eliminar producto por id (pid)
 productsRouter.delete('/:pid', async (req, res) => {
