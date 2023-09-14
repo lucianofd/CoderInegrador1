@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io;
 const content = document.getElementById("content");
 
 socket.on("realTimeProducts", (data) => {

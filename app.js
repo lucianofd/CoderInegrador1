@@ -37,11 +37,10 @@ app.engine('handlebars', expressHandlebars.engine({
   handlebars: allowInsecurePrototypeAccess(Handlebars)
 }));
 app.set("view engine", "handlebars");
-app.use('../src/public/js', express.static('../src/public/js', { contentType: 'application/javascript' }));
-app.use(express.urlencoded({extended:true}));
+
 // Especifica la ubicación de las vistas
 //app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(__dirname + "/src/public"));
+app.use('/src/public', express.static(__dirname + "/src/public"));
 // routers de productos y carritos. rutas
 app.use("/api/products/", productsRouter);
 app.use("/api/carts/", cartsRouter);

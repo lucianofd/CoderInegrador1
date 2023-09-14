@@ -1,9 +1,10 @@
+import { Schema, model, Types} from "mongoose";
 import mongoose from "mongoose";
 
 let collection = 'carts';
-const cartSchema = new mongoose.Schema({
+const cartSchema = new Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Types.ObjectId,
         ref: "users", // Nombre de la colección de usuarios
         required: false
     },
@@ -22,4 +23,4 @@ cartSchema.pre("findOne", function() {
     this.populate("products.product");
 });
 
-export const cartModel = mongoose.model(collection, cartSchema);
+export const cartModel = model(collection, cartSchema);
