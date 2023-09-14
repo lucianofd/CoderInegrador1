@@ -8,15 +8,44 @@ import http from 'http';
 import expressHandlebars from "express-handlebars";
 import Handlebars from "handlebars";
 import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access';
+import session from "express-session";
+import MongoStore from "connect-mongo";
+import passport from "passport";
+import initializePassport from "./config/passport.config.js";
 
 import ProductManager from './src/dao/ProductManager.js';
 import productsRouter from './src/routes/products.js';
 import cartsRouter from './src/routes/carts.js';
 import viewsRouter from './src/routes/views.js';
 import CartManager from './src/dao/CartManager.js';
+import sessionRouter from './src/routes/session.js';
 
+/*
+if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
+  console.error('Missing GitHub OAuth configuration');
+  process.exit(1); 
+}
+*/
 const app = express();
 const PORT = 8080;
+const mongoUrl = process.env.DATABSE_URL;
+const sessionSecret = process.env.GITHUB_SECRET;
+
+app.use(session({
+  store:MongoStore.create({
+      mongoUrl: mongoUrl,
+      mongoOptions:{useNewUrlParser:true, useUnifiedTopology:true},
+      ttl:10000
+  }),
+   secret: sessionSecret, 
+  resave:false,
+  saveUninitialized:false
+}));
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 const server = http.createServer(app);
 const io = new Server(server);
 
@@ -44,6 +73,7 @@ app.use('/src/public', express.static(__dirname + "/src/public"));
 // routers de productos y carritos. rutas
 app.use("/api/products/", productsRouter);
 app.use("/api/carts/", cartsRouter);
+app.use("/api/sessions/", sessionRouter);
 app.use("/", viewsRouter);
 
 
