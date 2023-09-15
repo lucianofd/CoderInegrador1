@@ -28,23 +28,22 @@ if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
 */
 const app = express();
 const PORT = 8080;
-const mongoUrl = process.env.DATABSE_URL;
-const sessionSecret = process.env.GITHUB_SECRET;
 
+const mongoUrl = process.env.DATABASE_URL;
+const sessionSecret = process.env.GITHUB_SECRET;
 app.use(session({
   store:MongoStore.create({
-      mongoUrl: mongoUrl,
-      mongoOptions:{useNewUrlParser:true, useUnifiedTopology:true},
-      ttl:10000
+    mongoUrl: mongoUrl,
+    mongoOptions:{useNewUrlParser:true, useUnifiedTopology:true},
+    ttl:10000
   }),
-   secret: sessionSecret, 
+  secret: sessionSecret, 
   resave:false,
   saveUninitialized:false
 }));
 initializePassport();
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 const server = http.createServer(app);
 const io = new Server(server);
