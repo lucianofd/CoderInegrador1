@@ -3,6 +3,7 @@ import './config/database.js';
 import mongoose from 'mongoose';
 import express from "express";
 import __dirname from "./utils.js";
+import path from 'path';
 import { Server } from 'socket.io';
 import http from 'http';
 import expressHandlebars from "express-handlebars";
@@ -32,14 +33,16 @@ const PORT = 8080;
 const mongoUrl = process.env.DATABASE_URL;
 const sessionSecret = process.env.GITHUB_SECRET;
 app.use(session({
+  secret: sessionSecret, 
+  resave:false,
+  saveUninitialized:false,
+  cookie: { secure: false },
   store:MongoStore.create({
     mongoUrl: mongoUrl,
+    collectionName: "sessions",
     mongoOptions:{useNewUrlParser:true, useUnifiedTopology:true},
     ttl:10000
   }),
-  secret: sessionSecret, 
-  resave:false,
-  saveUninitialized:false
 }));
 initializePassport();
 app.use(passport.initialize());
@@ -60,7 +63,7 @@ app.use(express.json());
 const PM = new ProductManager();
 const CM = new CartManager();
 
-app.set("views", __dirname + "/src/views");
+app.set("views", __dirname + "/src/views"),
 app.engine('handlebars', expressHandlebars.engine({
   handlebars: allowInsecurePrototypeAccess(Handlebars)
 }));
@@ -68,7 +71,14 @@ app.set("view engine", "handlebars");
 
 // Especifica la ubicación de las vistas
 //app.set('views', path.join(__dirname, 'views'));
-app.use('/src/public', express.static(__dirname + "/src/public"));
+app.use('/public', express.static(path.join(__dirname, 'src', 'public'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+  },
+}));
+
 // routers de productos y carritos. rutas
 app.use("/api/products/", productsRouter);
 app.use("/api/carts/", cartsRouter);

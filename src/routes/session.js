@@ -3,6 +3,7 @@ import UserManager from "../dao/UserManager.js";
 import { createHash } from "../../utils.js";
 import { isValidPassword } from "../../utils.js";
 import passport from "passport";
+import viewsRouter from "./views.js";
 
 const sessionRouter = express.Router();
 const UM = new UserManager();
@@ -39,5 +40,15 @@ sessionRouter.get("/githubcallback", passport.authenticate("github", {failureRed
     req.session.loggedIn = true;
     res.redirect("/products");
 });
+
+viewsRouter.post("/logout", (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.redirect("/profile");
+        }
+        res.redirect("/login");
+    });
+});
+
 
 export default sessionRouter;
