@@ -1,64 +1,105 @@
-import {userModel}  from "./models/user.model.js";
-import { createHash }  from "../../utils.js";
+import { userModel } from "./models/user.model.js";
+import { createHash } from "../../utils.js";
 
 class UserManager {
-    async addUser(user) {
-        try {
-            
-            const existingUser = await userModel.findOne({ email: user.email });
-            if (existingUser) {
-                throw new Error("User with this email already exists");
-            }
+  async addUser(user) {
+    try {
+      const existingUser = await userModel.findOne({ email: user.email });
+      if (existingUser) {
+        return { status: "error", message: "User with this email already exists" };
+      }
 
-            // Hash user's password 
-            user.password = createHash(user.password);
+      // Valida la contraseña antes de guardarla
+      if (!isValidPassword(user.password)) {
+        return { status: "error", message: "Invalid password format" };
+      }
 
-            // 'admin' role 
-            if (user.email === "adminCoder@coder.com") {
-                user.role = "admin";
-            }
+      // Hash de la contraseña
+      user.password = createHash(user.password);
 
-            await userModel.create(user);
-            console.log("User added!");
+      
+      if (user.email === process.env.ADMIN_EMAIL) {
+        user.role = ROLES.ADMIN;
+      } else {
+        user.role = ROLES.USER;
+      }
 
-            return true;
-        } catch (error) {
-            console.error("Error adding user:", error.message);
-            throw error; 
-        }
+      await userModel.create(user);
+      console.log("User added!");
+
+      return { status: "success", message: "User added successfully" };
+    } catch (error) {
+      console.error("Error adding user:", error.message);
+      throw error;
     }
+  }
 
-    async login(user) {
-        try {
-            const userLogged = await userModel.findOne({ email: user }) || null;
+  async login(userEmail) {
+    try {
+      const userLogged = await userModel.findOne({ email: userEmail }) || null;
 
-            if (userLogged) {
-                console.log("User logged!");
-                return userLogged;
-            }
-
-            return null; 
-        } catch (error) {
-            console.error("Error during login:", error.message);
-            throw error;
-        }
+      if (userLogged) {
+        console.log("User logged!");
+        return { status: "success", user: userLogged };
+      } else {
+        return { status: "error", message: "User not found" };
+      }
+    } catch (error) {
+      console.error("Error during login:", error.message);
+      throw error;
     }
+  }
 
-    async restorePassword(user, pass) {
-        try {
-            const result = await userModel.updateOne({ email: user }, { password: pass });
+  async restorePassword(userEmail, newPassword) {
+    try {
+      // Validar la nueva contraseña
+      if (!isValidPassword(newPassword)) {
+        return { status: "error", message: "Invalid password format" };
+      }
 
-            if (result.nModified > 0) {
-                console.log("Password Restored!");
-                return true;
-            }
+      const result = await userModel.updateOne(
+        { email: userEmail },
+        { password: createHash(newPassword) }
+      );
 
-            return false; // false no user updated
-        } catch (error) {
-            console.error("Error restoring password:", error.message);
-            throw error;
-        }
+      if (result.nModified > 0) {
+        console.log("Password Restored!");
+        return { status: "success", message: "Password restored successfully" };
+      }
+
+      return { status: "error", message: "User not found or password not updated" };
+    } catch (error) {
+      console.error("Error restoring password:", error.message);
+      throw error;
     }
+  }
 }
+
+//  para los roles
+const ROLES = {
+  ADMIN: "admin",
+  USER: "user",
+};
+
+// Función para validar la contraseña 
+function isValidPassword(password) {
+    // Verifica la longitud mínima
+    if (password.length < 6) {
+      return false;
+    } 
+    // Verifica si incluye al menos una letra mayúscula
+    if (!/[A-Z]/.test(password)) {
+      return false;
+    } 
+    // Verifica si incluye al menos una letra minúscula
+    if (!/[a-z]/.test(password)) {
+      return false;
+    }  
+    // Verifica si incluye al menos un número
+    if (!/\d/.test(password)) {
+      return false;
+    }
+    return true;
+  }  
 
 export default UserManager;
