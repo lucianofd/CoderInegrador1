@@ -1,7 +1,8 @@
+
 import UserManager from '../dao/UserManager.js';
 import jwt from 'jsonwebtoken';
 import { userModel } from '../models/user.models.js';
-import { JWT_SECRET } from '../config/config.js';
+import { JWT_SECRET } from '../../config/passport.config.js';
 
 class AuthService {
   constructor() {

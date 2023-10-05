@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express from "express";
-import { createHash, isValidPassword, passportCall, authorization } from "../utils.js";
+import { createHash, isValidPassword, passportCall, authorization } from "../../utils.js";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import { userModel } from "../dao/models/user.model.js";

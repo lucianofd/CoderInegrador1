@@ -8,7 +8,10 @@ import { createHash, isValidPassword } from "../utils.js";
 
 const JWTStrategy = jwt.Strategy;
 const LocalStrategy = local.Strategy;
-const ExtractJWT = jwt.ExtractJwt;
+const ExtractJWT = jwt.ExtractJwt; 
+const SECRET_KEY_SESSION= process.env.SECRET_KEY_SESSION
+const JWT_SECRET= process.env.JWT_SECRET
+
 
 const initializePassport = () => {
     passport.use("login", new LocalStrategy({passReqToCallback:true, usernameField:"email", session:false}, async (req, username, password, done) => {
