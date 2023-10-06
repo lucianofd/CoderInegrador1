@@ -1,5 +1,5 @@
 
-import { productModel } from "./models/products.model.js";
+import productModel from "./models/products.model.js";
 
 class ProductManager {
 

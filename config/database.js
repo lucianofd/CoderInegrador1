@@ -1,7 +1,8 @@
-import 'dotenv/config';
-import mongoose from "mongoose";
 
-const databaseURL = process.env.DATABASE_URL;
+import mongoose from "mongoose";
+import { DATABASE_URL } from "./config.js";
+
+const databaseURL = DATABASE_URL;
 /*
 mongoose.connect(databaseURL)
 .then(()=>{

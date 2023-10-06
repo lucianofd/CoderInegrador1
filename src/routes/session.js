@@ -3,58 +3,28 @@ import express from "express";
 import { createHash, isValidPassword, passportCall, authorization } from "../../utils.js";
 import passport from "passport";
 import jwt from "jsonwebtoken";
-import { userModel } from "../dao/models/user.model.js";
-const PRIVATE_KEY = "";
+import UserController from '../controller/userController.js';
+import AuthController from '../controller/authoController.js';
+
 
 const sessionRouter = express.Router();
+const sessionController = AuthController;
+const userController = UserController;
 
-sessionRouter.post("/login", async (req, res) => {
-    const {email, pass} = req.body;
+const PRIVATE_KEY = process.env.JWT_SECRET || 'S3CR3T';
 
-    let user = await userModel.findOne({email:email});
+sessionRouter.post("/login", async (req, res) => sessionController.login(req, res));
 
-    if (!user) {
-        return res.status(401).send({status:"error", message:"Error! El usuario no existe!"});
-    }
+sessionRouter.get("/logout", async (req, res) => sessionController.logout(req, res));
 
-    
-    let token = jwt.sign({email:email, password:pass, role:user.role}, PRIVATE_KEY, {expiresIn:"24h"});
-    res.cookie("coderCookieToken", token, {maxAge:3600*1000, httpOnly:true});
+sessionRouter.post("/register", passport.authenticate("register", { failureRedirect: "/failregister" }), async (req, res) => userController.register(req, res));
 
-    return res.redirect("/products");
-});
+sessionRouter.get("/restore", async (req, res) => userController.restorePassword(req, res));
 
-sessionRouter.get("/logout", async (req, res) => {
-    req.session.destroy;
-    res.redirect("/");
-});
+sessionRouter.get("/current", passportCall("jwt"), authorization("user"), (req, res) => sessionController.currentUser(req, res));
 
-sessionRouter.post("/register", passport.authenticate("register", {failureRedirect:"/failregister"}), async (req, res) => {
-    return res.redirect("/login");
-});
+sessionRouter.get("/github", passport.authenticate("github", { scope: ["user:email"] }), async (req, res) => sessionController.github(req, res));
 
-sessionRouter.get("/restore", async (req, res) => {
-    let {user, pass} = req.query;
-    pass = createHash(pass);
-    const passwordRestored = await UM.restorePassword(user, pass);
-
-    if (passwordRestored) {
-        res.send({status:"ok", message:"La contraseña se ha actualizado correctamente!"});
-    } else {
-        res.status(401).send({status:"error", message:"No se pudo actualizar la contraseña!"});
-    }    
-});
-
-sessionRouter.get("/current", passportCall("jwt"), authorization("user"), (req, res) => {
-    res.send({status:"OK", payload:req.user});
-});
-
-sessionRouter.get("/github", passport.authenticate("github", {scope:["user:email"]}), async (req, res) => {});
-
-sessionRouter.get("/githubcallback", passport.authenticate("github", {failureRedirect:"/login"}), async (req, res) => {
-    req.session.user = req.user;
-    req.session.loggedIn = true;
-    res.redirect("/products");
-});
+sessionRouter.get("/githubcallback", passport.authenticate("github", { failureRedirect: "/login" }), async (req, res) => sessionController.githubCallback(req, res));
 
 export default sessionRouter;

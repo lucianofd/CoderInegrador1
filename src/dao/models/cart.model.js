@@ -23,4 +23,6 @@ cartSchema.pre("findOne", function() {
     this.populate("products.product");
 });
 
-export const cartModel = model(collection, cartSchema);
+const cartModel = model(collection, cartSchema);
+
+export default cartModel;

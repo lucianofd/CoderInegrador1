@@ -49,9 +49,9 @@ productsRouter.post('/', async (req, res) => {
   
   let product = await PM.addProduct({title, description, code, price, status, stock, category, thumbnails});
     if (product) {
-      res.send({status:"ok", message:"El Producto se agregó correctamente!"});
+      return res.send({status:"ok", message:"El Producto se agregó correctamente!"});
   } else {
-      res.status(500).send({status:"error", message:"Error! No se pudo agregar el Producto!"});
+     return res.status(500).send({status:"error", message:"Error! No se pudo agregar el Producto!"});
   }
   
 });
