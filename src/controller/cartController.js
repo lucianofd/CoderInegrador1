@@ -5,6 +5,7 @@ class CartController {
     this.cartService = new CartService();
   }
 
+  //Crear carrito 
   async createCart(req, res) {
     try {
       const newCart = await this.cartService.createCart();
@@ -16,7 +17,7 @@ class CartController {
       });
     }
   }
-
+  //Obtener carrito
   async getCart(req, res) {
     try {
       const cart = await this.cartService.getCart(req.params.cid);
@@ -28,7 +29,7 @@ class CartController {
       });
     }
   }
-
+  //Agregar prducto al carrito
   async addProductToCart(req, res) {
     try {
       const { cid, pid } = req.params;
@@ -41,7 +42,7 @@ class CartController {
       });
     }
   }
-
+  //Aumentar cantidad de productos
   async updateQuantity(req, res) {
     try {
       const { cid, pid } = req.params;
@@ -58,7 +59,7 @@ class CartController {
   }
 
   
-
+  //Eliminar un producto
   async deleteProduct(req, res) {
     try {
       const { cid, pid } = req.params;
@@ -68,7 +69,7 @@ class CartController {
       res.status(400).send({ status: 'error', message: error.message });
     }
   }
-
+  //Eliminar todos los productos
   async deleteProducts(req, res) {
     try {
       const cid = req.params.cid;
