@@ -1,85 +1,21 @@
 import express from 'express';
 import ProductManager from '../dao/ProductManager.js';
+import ProductController from '../controller/productController.js'
 
 const productsRouter = express.Router();
 const PM = new ProductManager();
+const  productController = ProductController;
 
 
 //POST agregar un producto
-productsRouter.post('/', async (req, res) => {
-
-  let {title, description, code, price, status, stock, category, thumbnails} = req.body;
-    // Validar los campos requeridos
-  if (!title){
-      res.status(400).send({status:"error", message:"Error! No se cargó el campo Title!"});
-      return false;
-  }
-  if (!description){
-    res.status(400).send({status:"error", message:"Error! No se cargó el campo Description!"});
-    return false;
-  }
-  if (!code){
-  res.status(400).send({status:"error", message:"Error! No se cargó el campo Code!"});
-  return false;
-  }
-  if (!price){
-  res.status(400).send({status:"error", message:"Error! No se cargó el campo Price!"});
-  return false;
-  }
-
-  status = !status && true;
-
-  if (!stock){
-  res.status(400).send({status:"error", message:"Error! No se cargó el campo Stock!"});
-  return false;
-  }
-
-  if (!category){
-  res.status(400).send({status:"error", message:"Error! No se cargó el campo Category!"});
-  return false;
-  }
-
-  if (!thumbnails){
-  res.status(400).send({status:"error", message:"Error! No se cargó el campo Thumbnails!"});
-  return false;
-  } else if ((!Array.isArray(thumbnails)) || (thumbnails.length == 0)) {
-  res.status(400).send({status:"error", message:"Error! Debe ingresar al menos una imagen!"});
-  return false;
-  }
-  
-  let product = await PM.addProduct({title, description, code, price, status, stock, category, thumbnails});
-    if (product) {
-      return res.send({status:"ok", message:"El Producto se agregó correctamente!"});
-  } else {
-     return res.status(500).send({status:"error", message:"Error! No se pudo agregar el Producto!"});
-  }
-  
-});
+productsRouter.post('/', async (req, res) => productController.addProduct(req, res));
 
 //GET obtener un producto por id (pid)
-productsRouter.get('/:pid', async (req, res) => {
-    let pid = req.params.pid;
-    try {
-      const product = await PM.getProductById(pid);
-      if (product) {
-        res.status(200).send({product});
-      } else {
-        res.status(404).send({ error: 'Producto no encontrado' });
-      }
-    } catch (error) {
-      res.status(500).send({ error: 'Error interno del servidor' });
-    }
-  });
+productsRouter.get('/:pid', async (req, res) => productController.getProductsById(req, res));
   
  //Get obtener listado de productos
-productsRouter.get('/', async (req, res) => {
-  try {
-    const products = await PM.getProducts(req.query);
-    res.send({products});
-  } catch (error) {
-    res.status(500)({ error: 'Error interno del servidor' });
-  }
-});
+productsRouter.get('/', async (req, res) => productController.getProducts(req, res));
+ 
 
 // GET para la vista en tiempo real
 productsRouter.get('/realtimeproducts', (req, res) => {
@@ -90,27 +26,10 @@ productsRouter.get('/realtimeproducts', (req, res) => {
 
 
 //PUT actualizar un producto por id (pid)
-productsRouter.put('/:pid', async (req, res) => {
-  const pid = req.params.pid;
-  const updatedProduct = req.body;
-  try {
-    await PM.updateProduct(pid, updatedProduct);
-    res.status(200).send({ message:"El Producto se actualizó correctamente!"});;
-  } catch (error) {
-    res.status(500).send({ error:"Fallo al actualizar prodcuto" });
-  }
-});
+productsRouter.put('/:pid', async (req, res) => productController.updateProduct(req,res));
 
 // DELETE para eliminar producto por id (pid)
-productsRouter.delete('/:pid', async (req, res) => {
-    const pid = req.params.pid;
-    try {
-      await PM.deleteProduct(pid);
-      res.send({message:'Producto eliminado!'});
-    } catch(error){
-      res.status(500).json({error:'Error interno'});
-    }
-});
+productsRouter.delete('/:pid', async (req, res) => productController.deleteProduct(req,res));
 
 
 export default productsRouter;

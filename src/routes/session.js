@@ -1,8 +1,8 @@
-import 'dotenv/config';
+
 import express from "express";
-import { createHash, isValidPassword, passportCall, authorization } from "../../utils.js";
+import { JWT_SECRET } from "../../config/config.js";
+import {  passportCall, authorization } from "../../utils.js";
 import passport from "passport";
-import jwt from "jsonwebtoken";
 import UserController from '../controller/userController.js';
 import AuthController from '../controller/authoController.js';
 
@@ -11,7 +11,8 @@ const sessionRouter = express.Router();
 const sessionController = AuthController;
 const userController = UserController;
 
-const PRIVATE_KEY = process.env.JWT_SECRET || 'S3CR3T';
+const PRIVATE_KEY = JWT_SECRET || 'S3CR3T';
+console.log(JWT_SECRET);
 
 sessionRouter.post("/login", async (req, res) => sessionController.login(req, res));
 

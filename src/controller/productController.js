@@ -1,11 +1,11 @@
 import ProductService from "../services/productService.js";
-import { socketServer } from "../../app.js";
+//import { io } from "../../app.js";
 
 class ProductController {
   constructor() {
     this.productService = new ProductService();
   }
-
+  //Obtener lista de productos
   async getProducts(req, res) {
     try {
       const products = await this.productService.getProducts(req.query);
@@ -17,7 +17,7 @@ class ProductController {
       console.log(error);
     }
   }
-
+  //Obtener un producto por su ID
   async getProductById(req, res) {
     try {
       const pid = req.params.pid;
@@ -40,7 +40,7 @@ class ProductController {
       return;
     }
   }
-
+  //Agregar un producto
   async addProduct(req, res) {
     let {
       title,
@@ -54,24 +54,21 @@ class ProductController {
     } = req.body;
     
 
-    if (!title) {
-      res.status(400).send({
+    if (!title) {res.status(400).send({
         status: "error",
         message: "Error! Required field : Title!",
       });
       return false;
     }
 
-    if (!description) {
-      res.status(400).send({
+    if (!description) {res.status(400).send({
         status: "error",
         message: "Error! Required field : Description!",
       });
       return false;
     }
 
-    if (!code) {
-      res.status(400).send({
+    if (!code) { res.status(400).send({
         status: "error",
         message: "Error! Required field : Code!",
       });
@@ -79,8 +76,7 @@ class ProductController {
     }
 
     if (!price) {
-      res.status(400).send({
-        status: "error",
+      res.status(400).send({ status: "error",
         message: "Error! Required field : Price!",
       });
       return false;
@@ -88,11 +84,83 @@ class ProductController {
 
     status = !status && true;
 
-    if (!stock) {
-      res.status(400).send({
+    if (!stock) {res.status(400).send({
         status: "error",
         message: "Error! Required field : Stock!",
       })
     }
   }
+  //Modificar un producto
+  async updateProduct(req, res) {
+    try {
+      const {
+        title,
+        description,
+        code,
+        price,
+        status,
+        stock,
+        category,
+        thumbnails,
+      } = req.body;
+      const pid = req.params.pid;
+
+      const wasUpdated = await this.productService.updateProduct(pid, {
+        title,
+        description,
+        code,
+        price,
+        status,
+        stock,
+        category,
+        thumbnails,
+      });
+
+      if (wasUpdated) {
+        res.send({
+          status: "ok",
+          message: "El Producto se actualizó correctamente!",
+        });
+        socketServer.emit("product_updated");
+      } else {
+        res.status(500).send({
+          status: "error",
+          message: "Error! No se pudo actualizar el Producto!",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .send({ status: "error", message: "Internal server error." });
+    }
+  }
+  //Eliminar un producto
+  async deleteProduct(req, res) {
+    try {
+      const pid = req.params.pid;
+
+      const wasDeleted = await this.productService.deleteProduct(pid);
+
+      if (wasDeleted) {
+        res.send({
+          status: "ok",
+          message: "El Producto se eliminó correctamente!",
+        });
+        socketServer.emit("product_deleted", { _id: pid });
+      } else {
+        res.status(500).send({
+          status: "error",
+          message: "Error! No se pudo eliminar el Producto!",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .send({ status: "error", message: "Internal server error." });
+    }
+  }
 } 
+
+export default ProductController
