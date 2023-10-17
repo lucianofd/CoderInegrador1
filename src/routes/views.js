@@ -32,7 +32,7 @@ viewsRouter.get("/", async (req, res) => {
     res.render("home", {products});
 });
 
-viewsRouter.get("/products", async (req, res) => {
+viewsRouter.get("/products", async (req, res) => { 
     const products = await PM.getProducts(req.query);
     res.render("products", {products});
 });
