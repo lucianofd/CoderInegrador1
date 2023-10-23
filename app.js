@@ -22,6 +22,8 @@ import viewsRouter from './src/routes/views.js';
 import CartManager from './src/dao/CartManager.js';
 import sessionRouter from './src/routes/session.js';
 
+
+
 /*
 if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
   console.error('Missing GitHub OAuth configuration');
@@ -87,6 +89,8 @@ app.use("/api/products/", productsRouter);
 app.use("/api/carts/", cartsRouter);
 app.use("/api/sessions/", sessionRouter);
 app.use("/", viewsRouter);
+
+
 
 
 

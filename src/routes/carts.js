@@ -1,5 +1,4 @@
 import express from 'express';
-import CartManager from '../dao/CartManager.js';
 import CartController from '../controller/cartController.js';
 import { authorization, passportCall } from '../../utils.js';
 
@@ -26,8 +25,8 @@ cartsRouter.delete("/:cid/products/:pid", async (req, res) => cartController.del
 //Eliminar carrito
 cartsRouter.delete("/:cid", async (req, res) => cartController.deleteProducts(req, res));
 
+//Final compra
 cartsRouter.post("/:cid/purchase", (req, res, next) => {
-    console.log('Ruta de compra accedida');
     next();
   }, passportCall("jwt"),(req, res) => cartController.createPurchaseTicket(req, res));
 
