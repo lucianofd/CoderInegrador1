@@ -22,7 +22,7 @@ sessionRouter.post("/register", passport.authenticate("register", { failureRedir
 
 sessionRouter.get("/restore", async (req, res) => userController.restorePassword(req, res));
 
-sessionRouter.get("/current", passportCall("jwt"), authorization("user"), (req, res) => sessionController.currentUser(req, res));
+sessionRouter.get("/current", passportCall("jwt"), authorization("user"), (req, res) => userController.currentUser(req, res));
 
 sessionRouter.get("/github", passport.authenticate("github", { scope: ["user:email"] }), async (req, res) => sessionController.github(req, res));
 

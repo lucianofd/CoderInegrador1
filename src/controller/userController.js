@@ -73,14 +73,25 @@ class UserController {
         .json({ status: "error", message: "Internal Server Error" });
     }
   }
+  //REVISAR
+  async currentUser(req, res) {
+    if (req.session.user) {
+      // Obtiene el usuario actual 
+      const user = await this.userService.getCurrentUser(req.session.user.id);
 
-  currentUser(req, res) {
-    if (req.user) {
-      return res.send({ status: "OK", payload: req.user });
+      if (user) {
+        
+        const userDTO = this.user.createUserDTO(user);
+        return res.status(200).json(userDTO);
+      } else {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+      }
     } else {
-      return res.status(401).send({ status: "Error", message: "No authorized" });
+      return res.status(401).json({ message: "No autorizado" });
     }
   }
+
 }
+
 
 export default UserController;
