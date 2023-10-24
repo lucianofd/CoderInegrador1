@@ -21,6 +21,8 @@ import cartsRouter from './src/routes/carts.js';
 import viewsRouter from './src/routes/views.js';
 import CartManager from './src/dao/CartManager.js';
 import sessionRouter from './src/routes/session.js';
+import emailRouter from './src/routes/emails.js';
+import smsRouter from './src/routes/sms.js';
 
 
 
@@ -89,6 +91,8 @@ app.use("/api/products/", productsRouter);
 app.use("/api/carts/", cartsRouter);
 app.use("/api/sessions/", sessionRouter);
 app.use("/", viewsRouter);
+app.use('/email', emailRouter);
+app.use('/sms', smsRouter);
 
 
 
