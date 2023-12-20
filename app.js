@@ -23,6 +23,7 @@ import CartManager from './src/dao/CartManager.js';
 import sessionRouter from './src/routes/session.js';
 import emailRouter from './src/routes/emails.js';
 import smsRouter from './src/routes/sms.js';
+import mockingRouter from './src/mocking/mockRouter.js';
 
 
 
@@ -93,6 +94,7 @@ app.use("/api/sessions/", sessionRouter);
 app.use("/", viewsRouter);
 app.use('/email', emailRouter);
 app.use('/sms', smsRouter);
+app.use('/mockingproducts', mockingRouter);
 
 
 
