@@ -1,4 +1,4 @@
-import { JWT_SECRET, CLIENT_ID_GITHUB, CLIENT_SECRET_GITHUB, ADMIN_EMAIL } from "../config/config.js"
+import {ENV_CONFIG } from "../config/config.js"
 import passport from "passport";
 import jwt from "passport-jwt";
 import local from "passport-local";
@@ -12,18 +12,20 @@ const LocalStrategy = local.Strategy;
 const ExtractJWT = jwt.ExtractJwt;
 
 const initializePassport = () => {
-    passport.use("login", new LocalStrategy({ passReqToCallback: true, usernameField: "email", session: false }, async (req, username, password, done) => {
+    passport.use("login", new LocalStrategy(
+    { passReqToCallback: true, usernameField: "email", passwordField: "password" },
+     async (username, password, done) => {
         const { email } = req.body;
         try {
             let user = await userModel.findOne({ email: username });
 
             if (!user) {
-                console.error("Error! El usuario no existe!");
+                
                 return done(null, false, { message: "Usuario no encontrado" });
             }
 
             if (!isValidPassword(user, password)) {
-                console.error("Error! La contraseña es inválida!");
+               
                 return done(null, false, { message: "Contraseña incorrecta" });
             }
 
@@ -34,7 +36,9 @@ const initializePassport = () => {
         }
     }));
 
-    passport.use("register", new LocalStrategy({ passReqToCallback: true, usernameField: "email" }, async (req, username, password, done) => {
+    passport.use("register", new LocalStrategy(
+        { passReqToCallback: true, usernameField: "email" },
+        async (req, username, password, done) => {
         const { first_name, last_name, email, age } = req.body;
 
         try {
@@ -47,8 +51,12 @@ const initializePassport = () => {
 
             user = { first_name, last_name, email, age, password: createHash(password) };
 
-            if (user.email === ADMIN_EMAIL) {
+            if (user.email === ENV_CONFIG.ADMIN_EMAIL) {
+                req.logger.info("Asignando rol de admin");
                 user.role = "admin";
+            } else{
+                req.logger.info("Asignando role de usuario");
+                user.role = "user";
             }
 
             let result = await userModel.create(user);
@@ -57,17 +65,21 @@ const initializePassport = () => {
                 return done(null, result);
             }
         } catch (error) {
-            console.error("Error en el registro:", error);
+            req.logger.error("Error durante el proceso de registro:", error);
             return done(error);
         }
     }));
 
     passport.use("jwt", new JWTStrategy({
         jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor]),
-        secretOrKey: JWT_SECRET
+        secretOrKey: ENV_CONFIG.JWT_SECRET
     }, async (jwt_payload, done) => {
         try {
-            return done(null, jwt_payload);
+            const user = await userModel.findOne({email: jwt_payload.email});
+            if (!user){
+            return done(null, false, {message: "Usuario no encontrado"});
+            }
+            return done(null, user);
         } catch (error) {
             console.error("Error en la autenticación JWT:", error);
             return done(error);
@@ -117,12 +129,14 @@ const initializePassport = () => {
 
 const cookieExtractor = (req) => {
     let token = null;
-
+  
     if (req && req.cookies) {
-        token = req.cookies["coderCookieToken"];
+      req.logger.info("Cookies:", req.cookies);
+      token = req.cookies["coderCookieToken"];
     }
-
+  
+    req.logger.info("Token Extracted:", token);
     return token;
-};
+  };
 
 export default initializePassport;

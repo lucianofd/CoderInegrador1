@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import cartModel from '../models/cart.model.js';
 import CartService from "../services/cartService.js";
 import productManager from '../dao/ProductManager.js'; 
 import ticketController from './ticketController.js';
@@ -13,11 +14,13 @@ class CartController {
     try {
       const newCart = await this.cartService.createCart();
       res.send(newCart);
+      req.logger.info("Cart created:", newCart)
     } catch (error) {
       res.status(500).send({
         status: "error",
         message: error.message,
       });
+      req.logger.error("Error creating cart:", error);
     }
   }
   //Obtener carrito
@@ -25,11 +28,13 @@ class CartController {
     try {
       const cart = await this.cartService.getCart(req.params.cid);
       res.send({ products: cart.products });
+      req.logger.info("Cart retrieved:", cart);
     } catch (error) {
       res.status(400).send({
         status: "error",
         message: error.message,
       });
+      req.logger.error("Error getting cart:", error);
     }
   }
   //Agregar prducto al carrito
@@ -158,9 +163,25 @@ class CartController {
     return { failedProducts, successfulProducts, totalAmount };
   }
 
+  async getPurchase(req, res) {
+    try {
+      const cid = req.params.cid;
+      const purchase = await this.cartService.getCart(cid);
 
-
-
+      if (purchase) {
+        res.json({ status: "success", data: purchase });
+      } else {
+        res
+          .status(404)
+          .json({ status: "error", message: "Compra no encontrada" });
+      }
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ status: "error", message: "Error interno del servidor" });
+    }
+  }
 }
 
 export default new CartController();

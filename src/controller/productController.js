@@ -1,6 +1,7 @@
 import ProductService from "../services/productService.js";
-//import { io } from "../../app.js";
-
+import { io } from "../../app.js";
+import CustomError from "../services/errors/CustomError.js";
+import { generateAuthenticationErrorInfo } from "../services/errors/messages/auth-error.js";
 class ProductController {
   constructor() {
     this.productService = new ProductService();
@@ -11,27 +12,37 @@ class ProductController {
       const products = await this.productService.getProducts(req.query);
       res.send(products);
     } catch (error) {
-      res
-        .status(500)
-        .send({ status: "error", message: "Error fetching products." });
-      console.log(error);
-    }
+      const productError = new CustomError({
+        name: "Product Fetch Error",
+        message: "Error fetching products.",
+        code: 500,
+        cause: error.message,
+      });
+      console.error(productError);
+      res.status(productError.code).send({
+        status: "error",
+        message: "Error fetching products.",
+      });
+    }   
   }
   //Obtener un producto por su ID
   async getProductById(req, res) {
     try {
       const pid = req.params.pid;
-      console.log("Product ID:", pid);
+      req.logger.info("Product ID:", pid);
       const product = await this.productService.getProductById(pid);
-      if (product) {
-        res.json(product);
-        return;
-      } else {
-        res
-          .status(404)
-          .send({ status: "error", message: "Product not found." });
-        return;
+      if (!product) {
+        throw new CustomError({
+          name: "Product Not Found Error",
+          message: generateProductErrorInfo(pid),
+          code: 404,
+        });
       }
+
+      res.status(200).json({
+        status: "success",
+        data: product,
+      });
     } catch (error) {
       console.error("Error fetching product by id:", error);
       res
@@ -89,6 +100,53 @@ class ProductController {
         message: "Error! Required field : Stock!",
       })
     }
+
+    try {
+      const wasAdded = await this.productService.addProduct({
+        title,
+        description,
+        code,
+        price,
+        status,
+        stock,
+        category,
+        thumbnails,
+      });
+
+      if (wasAdded && wasAdded._id) {
+        req.logger.info("Product added:", wasAdded);
+        res.send({
+          status: "ok",
+          message: "Product added succesfully!",
+        });
+        io.emit("product_created", {
+          _id: wasAdded._id,
+          title,
+          description,
+          code,
+          price,
+          status,
+          stock,
+          category,
+          thumbnails,
+        });
+        return;
+      } else {
+        req.logger.error("Product added fail, wasAdded:", wasAdded);
+        res.status(500).send({
+          status: "error",
+          message: "Error! Can't add product!",
+        });
+        return;
+      }
+    } catch (error) {
+      req.logger.error("Error en addProduct:", error, "Stack:", error.stack);
+      res
+        .status(500)
+        .send({ status: "error", message: "Internal server error." });
+      return;
+    }
+
   }
   //Modificar un producto
   async updateProduct(req, res) {
@@ -119,17 +177,17 @@ class ProductController {
       if (wasUpdated) {
         res.send({
           status: "ok",
-          message: "El Producto se actualizó correctamente!",
+          message: "Product update success!",
         });
-        socketServer.emit("product_updated");
+        io.emit("product_updated");
       } else {
         res.status(500).send({
           status: "error",
-          message: "Error! No se pudo actualizar el Producto!",
+          message: "Error! Can't updated product!",
         });
       }
-    } catch (error) {
-      console.error(error);
+    } catch (error) { 
+      req.logger.error(error);
       res
         .status(500)
         .send({ status: "error", message: "Internal server error." });
@@ -140,22 +198,37 @@ class ProductController {
     try {
       const pid = req.params.pid;
 
+      const product = await this.productService.getProductById(pid);
+
+      if (!product) {
+        req.logger.error("Product not found");
+        res.status(404).send({
+          status: "error",
+          message: "Product not found",
+        });
+        return;
+      }
+
+
       const wasDeleted = await this.productService.deleteProduct(pid);
 
       if (wasDeleted) {
+        req.logger.info("Product deleted successful")
         res.send({
           status: "ok",
-          message: "El Producto se eliminó correctamente!",
+          message: "Product deleted successful",
         });
         socketServer.emit("product_deleted", { _id: pid });
+        io.emit("Product deleted successful", {_id: pid})
       } else {
+        req.logger.error("Deleted Fail!")
         res.status(500).send({
           status: "error",
-          message: "Error! No se pudo eliminar el Producto!",
+          message: "Error! Delete product fail!",
         });
       }
     } catch (error) {
-      console.error(error);
+      req.logger.error(error);
       res
         .status(500)
         .send({ status: "error", message: "Internal server error." });

@@ -14,6 +14,8 @@ import session from "express-session";
 import MongoStore from "connect-mongo";
 import passport from "passport";
 import initializePassport from "./config/passport.config.js";
+import loggerRouter from './src/routes/logger.js';
+import { addLogger, devLogger} from './config/logger.js';
 
 import ProductManager from './src/dao/ProductManager.js';
 import productsRouter from './src/routes/products.js';
@@ -24,6 +26,7 @@ import sessionRouter from './src/routes/session.js';
 import emailRouter from './src/routes/emails.js';
 import smsRouter from './src/routes/sms.js';
 import mockingRouter from './src/mocking/mockRouter.js';
+
 
 
 
@@ -39,6 +42,7 @@ const PORT = PUERTO || 8080;
 const mongoUrl = DATABASE_URL;
 const sessionSecret = SECRET_KEY || 'S3CR3T'
 
+app.use(addLogger);
 //Config sessions and passport
 app.use(session({
   secret: sessionSecret, 
@@ -57,11 +61,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const server = http.createServer(app);
-const io = new Server(server);
+export const io = new Server(server);
 
 //servidor
 app.listen(PORT, () => {
-  console.log(`Servidor iniciado en el puerto ${PORT}`);
+  devLogger.info(`Servidor iniciado en el puerto ${PORT}`);
 });
 // Middleware para el manejo de JSON en el body
 app.use(express.json());
@@ -95,7 +99,7 @@ app.use("/", viewsRouter);
 app.use('/email', emailRouter);
 app.use('/sms', smsRouter);
 app.use('/mockingproducts', mockingRouter);
-
+app.use("/loggerTest", loggerRouter)
 
 
 
