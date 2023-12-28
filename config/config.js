@@ -1,6 +1,6 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import { Command } from "commander";
-
+ 
 const program = new Command();
 
 program
@@ -19,7 +19,7 @@ dotenv.config({
 
 export const ENV_CONFIG = {
 PUERTO: 8000,
-enviroment: environment,
+environment: environment,
 DATABASE_URL: process.env.DATABASE_URL,
 SECRET_KEY: process.env.SECRET_KEY_SESSION,
 JWT_SECRET: process.env.JWT_SECRET,

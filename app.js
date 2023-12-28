@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import './config/database.js';
-import {PUERTO, DATABASE_URL, SECRET_KEY} from './config/config.js'
+import {ENV_CONFIG} from './config/config.js'
 import mongoose from 'mongoose';
 import express from "express";
 import __dirname from "./utils.js";
@@ -37,10 +37,10 @@ if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
 }
 */
 const app = express();
-const PORT = PUERTO || 8080;
+const PORT = ENV_CONFIG.PUERTO || 8080;
 
-const mongoUrl = DATABASE_URL;
-const sessionSecret = SECRET_KEY || 'S3CR3T'
+const mongoUrl = ENV_CONFIG.DATABASE_URL;
+const sessionSecret = ENV_CONFIG.SECRET_KEY || 'S3CR3T'
 
 app.use(addLogger);
 //Config sessions and passport

@@ -1,5 +1,5 @@
 import winston, { transports } from "winston";
-//import {ENV_CONFIG} from "./config.js";
+import {ENV_CONFIG} from "./config.js";
 
 const customLevelsOptions = {
     levels:{

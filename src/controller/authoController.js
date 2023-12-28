@@ -1,6 +1,5 @@
 import AuthService from "../services/authoService.js";
 import CustomError from "../services/errors/CustomError.js";
-import EErrors from "../services/errors/errors-enum.js";
 import { generateAuthenticationErrorInfo } from "../services/errors/messages/auth-error.js";
 
 class AuthController {
@@ -12,7 +11,7 @@ class AuthController {
     try{
     const { email, password } = req.body;
     const userData = await this.authService.login(email, password); 
-    req.logger.info("User data retrieved:", userData);
+    
   
     if (!userData || !userData.user) { 
       req.logger.error("Invalid credentials");
@@ -22,15 +21,12 @@ class AuthController {
         code: 401,
         cause: generateAuthenticationErrorInfo(email), 
       });
+      req.logger.error("Invalid credentials");
       return next(customError);
     }
   
-    if (userData && userData.user) {
+    if (userData && userData.user && req.session) {
 
-      if (!req.session) {
-        req.logger.error("Session not available");
-        return next(new Error("Session not available"));
-      };
       req.session.user = {
           id: userData.user.id || userData.user._id,
           email: userData.user.email,
@@ -47,7 +43,7 @@ class AuthController {
     res.cookie('coderCookieToken', 
     userData.token, { httpOnly: true, secure: false });
   
-    console.log('Role retrieved:', userData.user.role);
+    req.logger.info('Role retrieved:', userData.user.role);
   
     return res
         .status(200)
@@ -73,7 +69,7 @@ class AuthController {
         return res.redirect("/login");
       }
     } catch (error) {
-      console.error("An error occurred:", error);
+      req.logger.error("An error occurred:", error);
       return res.redirect("/login");
     }
   }
@@ -81,6 +77,7 @@ class AuthController {
   logout(req, res) {
     req.session.destroy((err) => {
       if (err) {
+        req.logger.error("An error occurred during logout:", err)
         return res.redirect("/profile");
       }
       return res.redirect("/login");

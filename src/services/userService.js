@@ -1,4 +1,4 @@
-import 'dotenv/config.js'
+import { ENV_CONFIG } from "../../config/config.js";
 import UserManager from "../dao/UserManager.js";
 
 class UserService {
@@ -9,8 +9,8 @@ class UserService {
   async registerUser({ first_name, last_name, email, age, password, role }) {
     try {
       const role =
-        email == process.env.ADMIN_EMAIL &&
-        password === process.env.ADMIN_PASSWORD
+        email == ENV_CONFIG.ADMIN_EMAIL &&
+        password === ENV_CONFIG.ADMIN_PASSWORD
           ? "admin"
           : "user";
       const user = await this.userManager.addUser({
