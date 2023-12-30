@@ -1,10 +1,10 @@
 import twilio from 'twilio';
-import { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SMS_NUMBER } from '../config/config.js';
+import { ENV_CONFIG } from '../../config/config.js';
 
-const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+const twilioClient = twilio(ENV_CONFIG.TWILIO_ACCOUNT_SID, ENV_CONFIG.TWILIO_AUTH_TOKEN);
 const twilioSMSOptions = {
     body: "Esto es un mensaje SMS de prueba usando Twilio.",
-    from: TWILIO_SMS_NUMBER,
+    from: ENV_CONFIG.TWILIO_SMS_NUMBER,
     to: "+54 11 6745 0559",
 }
 

@@ -1,8 +1,8 @@
 
 import mongoose from "mongoose";
-import { DATABASE_URL } from "./config.js";
+import {ENV_CONFIG} from "./config.js";
 
-const databaseURL = DATABASE_URL;
+const databaseURL = ENV_CONFIG.DATABASE_URL;
 /*
 mongoose.connect(databaseURL)
 .then(()=>{

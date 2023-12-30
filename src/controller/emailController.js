@@ -1,12 +1,12 @@
 import nodemailer from "nodemailer";
-import { EMAIL_PASS, EMAIL_USER } from "../config/config.js";
+import { ENV_CONFIG } from "../../config/config.js";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
   port: 587,
   auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS,
+    user: ENV_CONFIG.EMAIL_USER,
+    pass: ENV_CONFIG.EMAIL_PASS,
   },
 });
 
@@ -19,16 +19,16 @@ transporter.verify(function (error, success) {
 });
 
 const mailOptions = {
-  from: "Coder Test " + EMAIL_USER,
-  to: EMAIL_USER,
+  from: "Coder Test " + ENV_CONFIG.EMAIL_USER,
+  to: ENV_CONFIG.EMAIL_USER,
   subject: "Correo de prueba Coder Programacion Backend.",
   html: "<div><h1>Esto es un Test de envio de correos con Nodemailer!</h1></div>",
   attachments: [],
 };
 
 const mailOptionsWithAtt = {
-  from: "Coder Test " + EMAIL_USER,
-  to: EMAIL_USER,
+  from: "Coder Test " + ENV_CONFIG.EMAIL_USER,
+  to: ENV_CONFIG.EMAIL_USER,
   subject: "Correo de prueba Coder Programacion Backend.",
   html: `<div>
               <h1>Esto es un Test de envio de correos con Nodemailer!</h1>

@@ -2,12 +2,12 @@
 import UserManager from '../dao/UserManager.js';
 import jwt from 'jsonwebtoken';
 import userModel  from '../models/user.model.js';
-import { JWT_SECRET } from '../../config/config.js';
+import { ENV_CONFIG } from '../../config/config.js';
 
 class AuthService {
   constructor() {
     this.userManager = new UserManager();
-    this.secretKey = JWT_SECRET;  
+    this.secretKey = ENV_CONFIG.JWT_SECRET;  
   }
 
   async login(email, password) {

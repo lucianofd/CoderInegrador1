@@ -1,7 +1,7 @@
 import express from "express";
-import { sendSMS } from "../controllers/smsController.js";
+import { sendSMS } from "../controller/smsController.js";
 
-const smsRouter = Router();
+const smsRouter = express.Router();
 
 smsRouter.get("/", sendSMS);
 

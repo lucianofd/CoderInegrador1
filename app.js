@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import './config/database.js';
-import {PUERTO, DATABASE_URL, SECRET_KEY} from './config/config.js'
+import {ENV_CONFIG} from './config/config.js'
 import mongoose from 'mongoose';
 import express from "express";
 import __dirname from "./utils.js";
@@ -14,6 +14,8 @@ import session from "express-session";
 import MongoStore from "connect-mongo";
 import passport from "passport";
 import initializePassport from "./config/passport.config.js";
+import loggerRouter from './src/routes/logger.js';
+import { addLogger, devLogger} from './config/logger.js';
 
 import ProductManager from './src/dao/ProductManager.js';
 import productsRouter from './src/routes/products.js';
@@ -23,6 +25,8 @@ import CartManager from './src/dao/CartManager.js';
 import sessionRouter from './src/routes/session.js';
 import emailRouter from './src/routes/emails.js';
 import smsRouter from './src/routes/sms.js';
+import mockingRouter from './src/mocking/mockRouter.js';
+
 
 
 
@@ -33,11 +37,12 @@ if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
 }
 */
 const app = express();
-const PORT = PUERTO || 8080;
+const PORT = ENV_CONFIG.PUERTO || 8080;
 
-const mongoUrl = DATABASE_URL;
-const sessionSecret = SECRET_KEY || 'S3CR3T'
+const mongoUrl = ENV_CONFIG.DATABASE_URL;
+const sessionSecret = ENV_CONFIG.SECRET_KEY || 'S3CR3T'
 
+app.use(addLogger);
 //Config sessions and passport
 app.use(session({
   secret: sessionSecret, 
@@ -56,11 +61,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const server = http.createServer(app);
-const io = new Server(server);
+export const io = new Server(server);
 
 //servidor
 app.listen(PORT, () => {
-  console.log(`Servidor iniciado en el puerto ${PORT}`);
+  devLogger.info(`Servidor iniciado en el puerto ${PORT}`);
 });
 // Middleware para el manejo de JSON en el body
 app.use(express.json());
@@ -93,7 +98,8 @@ app.use("/api/sessions/", sessionRouter);
 app.use("/", viewsRouter);
 app.use('/email', emailRouter);
 app.use('/sms', smsRouter);
-
+app.use('/mockingproducts', mockingRouter);
+app.use("/loggerTest", loggerRouter)
 
 
 

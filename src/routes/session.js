@@ -1,6 +1,6 @@
 
 import express from "express";
-import { JWT_SECRET } from "../../config/config.js";
+import { ENV_CONFIG } from "../../config/config.js";
 import {  passportCall, authorization } from "../../utils.js";
 import passport from "passport";
 import UserController from '../controller/userController.js';
@@ -8,15 +8,15 @@ import AuthController from '../controller/authoController.js';
 
 
 const sessionRouter = express.Router();
-const sessionController = AuthController;
-const userController = UserController;
+const sessionController = new AuthController();
+const userController = new UserController();
 
-const PRIVATE_KEY = JWT_SECRET || 'S3CR3T';
-console.log(JWT_SECRET);
+const PRIVATE_KEY = ENV_CONFIG.JWT_SECRET || 'S3CR3T';
+console.log(PRIVATE_KEY);
 
 sessionRouter.post("/login", async (req, res) => sessionController.login(req, res));
 
-sessionRouter.get("/logout", async (req, res) => sessionController.logout(req, res));
+sessionRouter.post("/logout", async (req, res) => sessionController.logout(req, res));
 
 sessionRouter.post("/register", passport.authenticate("register", { failureRedirect: "/failregister" }), async (req, res) => userController.register(req, res));
 
