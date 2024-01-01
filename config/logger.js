@@ -3,12 +3,12 @@ import {ENV_CONFIG} from "./config.js";
 
 const customLevelsOptions = {
     levels:{
-        debug: 0,
-        http: 1,
-        info: 2,
-        warning: 3,
-        error: 4,
-        fatal: 5,
+      fatal:0,
+      error:1,
+      warn:2,
+      info:3,
+      http:4,
+      debug:5,
       },
       
      colors: {
