@@ -7,10 +7,12 @@ const userSchema = new Schema({
     email:{type: String, require: true},
     age:{type: Number, require: false},
     password:{type: String, require: true},
+    resetPasswordToken:{type: String},
+    resetPasswordExpires:{type: Date},
     role: {
         type:String,
         default:"user",
-        enum:["user", "admin"]
+        enum:["user", "admin", "premium"]
     }
 });
 

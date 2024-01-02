@@ -15,7 +15,7 @@ const customLevelsOptions = {
         debug: 'blue',
         http: 'green',
         info: 'cyan',
-        warning: 'yellow',
+        warn: 'yellow',
         error: 'red',
         fatal: 'magenta',
       },

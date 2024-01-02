@@ -3,6 +3,7 @@ import mongoosePaginate from "mongoose-paginate-v2";
 
 let collection = 'products'
 const productSchema = new Schema({
+    id :{type: Number,},
     title:{ type: String, required: true, },
     description:{ type: String, required: true, },
     code:{ type: String, required: true },
@@ -11,7 +12,7 @@ const productSchema = new Schema({
     stock:{ type: Number, required: true },
     category:{ type: String, required: true},
     thumbnails:{ type: Array, required: true},
-    created_by: { type:Types.ObjectId,ref:'manager' }
+    owner: { type: String,ref:'users', default:"admin" }
 },
   {
     timestamps: true
