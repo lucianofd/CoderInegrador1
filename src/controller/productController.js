@@ -52,155 +52,169 @@ class ProductController {
     }
   }
   //Agregar un producto
-  async addProduct(req, res) {
-    let {
-      title,
-      description,
-      code,
-      price,
-      status,
-      stock,
-      category,
-      thumbnails,
+   async addProduct(req, res) {
+    const user = req.user;
+
+    if (!user) {
+        return res.status(401).json({
+            status: "error",
+            message: "Unauthorized: User not logged in.",
+        });
+    }
+      //Validar rol para operacion
+    if (!(user.role === 'admin' || user.role === 'premium')) {
+        return res.status(403).json({
+            status: "error",
+            message: "Forbidden: User does not have permission to add products.",
+        });
+    }
+
+    const {
+        title, description,
+        code, price,
+        status, stock,
+        category, thumbnails,
     } = req.body;
-    
 
-    if (!title) {res.status(400).send({
-        status: "error",
-        message: "Error! Required field : Title!",
-      });
-      return false;
-    }
-
-    if (!description) {res.status(400).send({
-        status: "error",
-        message: "Error! Required field : Description!",
-      });
-      return false;
-    }
-
-    if (!code) { res.status(400).send({
-        status: "error",
-        message: "Error! Required field : Code!",
-      });
-      return false;
-    }
-
-    if (!price) {
-      res.status(400).send({ status: "error",
-        message: "Error! Required field : Price!",
-      });
-      return false;
-    }
-
-    status = !status && true;
-
-    if (!stock) {res.status(400).send({
-        status: "error",
-        message: "Error! Required field : Stock!",
-      })
+    // Validacion campos
+    if (!title || !description || !code || !price || !stock) {
+        return res.status(400).send({
+            status: "error",
+            message: "Error! Required fields.",
+        });
     }
 
     try {
-      const wasAdded = await this.productService.addProduct({
-        title,
-        description,
-        code,
-        price,
-        status,
-        stock,
-        category,
-        thumbnails,
-      });
+        // agregar un producto
+        const wasAdded = await this.productService.addProduct({
+            title, description,
+            code, price,
+            status, stock,
+            category, thumbnails,
+            owner: user.email,
+        });
 
-      if (wasAdded && wasAdded._id) {
-        req.logger.info("Product added:", wasAdded);
-        res.send({
-          status: "ok",
-          message: "Product added succesfully!",
-        });
-        io.emit("product_created", {
-          _id: wasAdded._id,
-          title,
-          description,
-          code,
-          price,
-          status,
-          stock,
-          category,
-          thumbnails,
-        });
-        return;
-      } else {
-        req.logger.error("Product added fail, wasAdded:", wasAdded);
+        if (wasAdded !== undefined && wasAdded !== null) {
+          // Lógica cuando el producto se ha añadido correctamente
+          req.logger.info("Product added:", wasAdded);
+          res.send({
+            status: "ok",
+            message: "Product added succesfully!",
+          });
+
+            // Emitir evento ?
+            io.emit("product_created", {
+                _id: wasAdded._id,
+                title, description,
+                code, price,
+                status, stock,
+                category, thumbnails,
+            });
+        } else {
+            req.logger.error("Product added fail, wasAdded:", wasAdded);
+            res.status(500).send({
+                status: "error",
+                message: "Error! Can't add product!",
+            });
+          }
+      } catch (error) {
+        // Manejo  de errores
+        req.logger.error("Error en addProduct:", error, "Stack:", error.stack);
+
+        // mensaje específico según el tipo de error
+        if (error instanceof SpecificErrorType) {
+            return res.status(500).send({
+                status: "error",
+                message: "Error específico al agregar el producto.",
+            });
+        }
+
         res.status(500).send({
-          status: "error",
-          message: "Error! Can't add product!",
+            status: "error",
+            message: "Internal server error.",
         });
-        return;
-      }
-    } catch (error) {
-      req.logger.error("Error en addProduct:", error, "Stack:", error.stack);
-      res
-        .status(500)
-        .send({ status: "error", message: "Internal server error." });
-      return;
-    }
-
+        }
   }
-  //Modificar un producto
+
+  //UPDATE product
   async updateProduct(req, res) {
     try {
-      const {
-        title,
-        description,
-        code,
-        price,
-        status,
-        stock,
-        category,
-        thumbnails,
-      } = req.body;
-      const pid = req.params.pid;
+        const {
+            title, description,code,price,status,stock,category,thumbnails,
+        } = req.body;
+        const pid = req.params.pid;
 
-      const wasUpdated = await this.productService.updateProduct(pid, {
-        title,
-        description,
-        code,
-        price,
-        status,
-        stock,
-        category,
-        thumbnails,
-      });
+        // Obtener el producto/verificar el propietario
+        const actualProduct = await this.productService.getProductById(pid);
 
-      if (wasUpdated) {
-        res.send({
-          status: "ok",
-          message: "Product update success!",
+        if (!actualProduct) {
+            return res.status(404).json({
+                status: "error",
+                message: "Producto no encontrado.",
+            });
+        }
+
+        // Verificar si el usuario es propietario o un admi
+        const user = req.user;
+
+        if (!(user.role === 'admin' || actualProduct.owner.toString() === user.email)) {
+            return res.status(403).json({
+                status: "error",
+                message: "Prohibido: No tienes permiso para actualizar este producto.",
+            });
+        }
+
+        const wasUpdated = await this.productService.updateProduct(pid, {
+            title,description,
+            code,price,status,
+            stock,category, thumbnails,
         });
-        io.emit("product_updated");
-      } else {
-        res.status(500).send({
-          status: "error",
-          message: "Error! Can't updated product!",
-        });
+
+        if (wasUpdated) {
+            res.send({
+                status: "ok",
+                message: "¡El Producto se actualizó correctamente!",
+            });
+
+            io.emit("product_created", {
+              _id: wasUpdated._id,
+              title, description,
+              code, price,
+              status, stock,
+              category, thumbnails,
+          });;
+        } else {
+            res.status(500).send({
+                status: "error",
+                message: "Error! No se pudo actualizar el Producto!",
+            });
+        }
+    } catch (error) {
+      req.logger.error("Error en updateProduct:", error, "Stack:", error.stack);
+
+      // mensaje específico según el tipo de error
+      if (error instanceof SpecificErrorType) {
+          return res.status(500).send({
+              status: "error",
+              message: "Error específico al actualizar el producto.",
+          });
       }
-    } catch (error) { 
-      req.logger.error(error);
-      res
-        .status(500)
-        .send({ status: "error", message: "Internal server error." });
+        res.status(500).send({
+            status: "error",
+            message: "Error interno del servidor.",
+        });
     }
-  }
+}
+
+
   //Eliminar un producto
   async deleteProduct(req, res) {
     try {
       const pid = req.params.pid;
 
-      const product = await this.productService.getProductById(pid);
+      const actualProduct = await this.productService.getProductById(pid);
 
-      if (!product) {
+      if (!actualProduct) {
         req.logger.error("Product not found");
         res.status(404).send({
           status: "error",
@@ -209,6 +223,15 @@ class ProductController {
         return;
       }
 
+      // Verificar si el usuario es propietario o un admi
+      const user = req.user;
+
+      if (!(user.role === 'admin' || actualProduct.owner.toString() === user.email)) {
+          return res.status(403).json({
+              status: "error",
+              message: "Prohibido: No tienes permiso para eliminar este producto.",
+          });
+      }
 
       const wasDeleted = await this.productService.deleteProduct(pid);
 
@@ -218,8 +241,10 @@ class ProductController {
           status: "ok",
           message: "Product deleted successful",
         });
+
         socketServer.emit("product_deleted", { _id: pid });
         io.emit("Product deleted successful", {_id: pid})
+
       } else {
         req.logger.error("Deleted Fail!")
         res.status(500).send({

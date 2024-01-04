@@ -12,7 +12,10 @@ const productSchema = new Schema({
     stock:{ type: Number, required: true },
     category:{ type: String, required: true},
     thumbnails:{ type: Array, required: true},
-    owner: { type: String,ref:'users', default:"admin" }
+    owner: { 
+      type: { email: String, role: String },
+      default: { email: "admin", role: "admin" },
+     }
 },
   {
     timestamps: true
