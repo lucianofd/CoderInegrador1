@@ -14,13 +14,17 @@ const userController = new UserController();
 const PRIVATE_KEY = ENV_CONFIG.JWT_SECRET || 'S3CR3T';
 console.log(PRIVATE_KEY);
 
+sessionRouter.post("/register", passport.authenticate("register", { failureRedirect: "/failregister" }), async (req, res) => userController.register(req, res));
+
 sessionRouter.post("/login", async (req, res) => sessionController.login(req, res));
 
 sessionRouter.post("/logout", async (req, res) => sessionController.logout(req, res));
 
-sessionRouter.post("/register", passport.authenticate("register", { failureRedirect: "/failregister" }), async (req, res) => userController.register(req, res));
+//Modificar Password
+sessionRouter.post("/restore-password", async (req, res) => userController.restorePassword(req, res));
 
-sessionRouter.get("/restore", async (req, res) => userController.restorePassword(req, res));
+//Recuperar Password
+sessionRouter.post("/reset-password/:token", async(req, res)=> userController.resetPassword());
 
 sessionRouter.get("/current", passportCall("jwt"), authorization("user"), (req, res) => userController.currentUser(req, res));
 

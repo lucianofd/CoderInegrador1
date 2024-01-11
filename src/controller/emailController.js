@@ -1,90 +1,33 @@
 import nodemailer from "nodemailer";
 import { ENV_CONFIG } from "../../config/config.js";
+import transporter from "../../config/nodemailConfig.js";
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  port: 587,
-  auth: {
-    user: ENV_CONFIG.EMAIL_USER,
-    pass: ENV_CONFIG.EMAIL_PASS,
-  },
-});
 
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log("Server is ready to take our messages");
-  }
-});
 
-const mailOptions = {
-  from: "Coder Test " + ENV_CONFIG.EMAIL_USER,
-  to: ENV_CONFIG.EMAIL_USER,
-  subject: "Correo de prueba Coder Programacion Backend.",
-  html: "<div><h1>Esto es un Test de envio de correos con Nodemailer!</h1></div>",
-  attachments: [],
-};
-
-const mailOptionsWithAtt = {
-  from: "Coder Test " + ENV_CONFIG.EMAIL_USER,
-  to: ENV_CONFIG.EMAIL_USER,
-  subject: "Correo de prueba Coder Programacion Backend.",
-  html: `<div>
-              <h1>Esto es un Test de envio de correos con Nodemailer!</h1>
-              <p>Ahora usando imagenes: </p>
-              <img src="cid:meme"/>
-          </div>`,
-  attachments: [
-    {
-      filename: "Meme de Programacion",
-      // path: __dirname + "/public/images/meme.png",
-      cid: "meme",
-    },
-  ],
-};
-
-export const sendEmail = (req, res) => {
+export const sendEmail = async (req, res) => {
   try {
-    let result = transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log(error);
-        res.status(400).send({ message: "Error", payload: error });
-      }
-      console.log("Message sent: %s", info.messageId);
-      res.send({ message: "Success!", payload: info });
+    const info = await transporter.sendMail(mailOptions);
+    logger.info("Message sent:", info.messageId);
+    res.send({ message: "Success!", payload: info });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).send({
+      error: error,
+      message: "No se pudo enviar el correo electrónico desde:" + ENV_CONFIG.EMAIL_USER,
     });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .send({
-        error: error,
-        message: "No se pudo enviar el email desde:" + config.gmailAccount,
-      });
   }
 };
 
-export const sendEmailWithAtt = (req, res) => {
+export const sendEmailWithAtt = async (req, res) => {
   try {
-    let result = transporter.sendMail(
-      mailOptionsWithAtt,
-      (error, info) => {
-        if (error) {
-          console.log(error);
-          res.status(400).send({ message: "Error", payload: error });
-        }
-        console.log("Message sent: %s", info.messageId);
-        res.send({ message: "Success!", payload: info });
-      }
-    );
+    const info = await transporter.sendMail(mailOptionsWithAtt);
+    logger.info("Message sent:", info.messageId);
+    res.send({ message: "Success!", payload: info });
   } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .send({
-        error: error,
-        message: "No se pudo enviar el email desde:" + config.gmailAccount,
-      });
+    logger.error(error);
+    res.status(500).send({
+      error: error,
+      message: "No se pudo enviar el correo electrónico desde:" + ENV_CONFIG.EMAIL_USER,
+    });
   }
 };

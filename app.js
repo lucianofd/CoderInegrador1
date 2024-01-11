@@ -16,6 +16,7 @@ import passport from "passport";
 import initializePassport from "./config/passport.config.js";
 import loggerRouter from './src/routes/logger.js';
 import { addLogger, devLogger} from './config/logger.js';
+import DatabaseSingleton from './config/database.js';
 
 import ProductManager from './src/dao/ProductManager.js';
 import productsRouter from './src/routes/products.js';
@@ -40,7 +41,8 @@ const app = express();
 const PORT = ENV_CONFIG.PUERTO || 8080;
 
 const mongoUrl = ENV_CONFIG.DATABASE_URL;
-const sessionSecret = ENV_CONFIG.SECRET_KEY || 'S3CR3T'
+const sessionSecret = ENV_CONFIG.SECRET_KEY || 'S3CR3T';
+const dbSingleton = DatabaseSingleton.getInstance();
 
 app.use(addLogger);
 //Config sessions and passport

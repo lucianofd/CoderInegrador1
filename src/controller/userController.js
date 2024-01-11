@@ -50,7 +50,7 @@ class UserController{
       return next(customError);
         
     }
-   
+    
     const { first_name, last_name, email, age, password, role } = clientInput;
 
     const response = await this.userService.registerUser({
@@ -68,6 +68,7 @@ class UserController{
       }
   }
   
+  //ACTUALIZAR PASSWORD
   async restorePassword(req, res) {
     const { user, pass } = req.query;
     try {
@@ -93,6 +94,39 @@ class UserController{
       return next(error)
     }
   }
+  
+  // RECUPERAR PASSWORD
+  async resetPassword(req, res, next) {
+    try {
+      const { email, newPassword, confirmPassword} = req.body;
+      const resetToken = req.params.token;
+
+      // Validar que las contraseñas coincidan
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ message: "Las contraseñas no coinciden" });
+      }
+
+      // Validar el token de restablecimiento de contraseña
+      const user = await this.userService.getUser(email);
+      if (!user || user.resetPasswordToken !== resetToken || user.resetPasswordExpires < Date.now()) {
+        return res.status(400).json({ message: "Token de restablecimiento de contraseña inválido o expirado" });
+      }
+
+      // Restablecer la contraseña 
+      const hashedPassword = createHash(newPassword);
+      await this.userService.restorePassword(user, hashedPassword);
+      
+
+      return res.status(200).json({ message: "Contraseña restablecida con éxito" });
+    } catch (error) {
+      console.error(error);
+      return next(error);
+    }
+  }
+
+
+
+
   //REVISAR
   async currentUser(req, res) {
     if (req.session.user) {
@@ -114,4 +148,4 @@ class UserController{
 }
 
 
-export default UserController;
+export default UserController; 

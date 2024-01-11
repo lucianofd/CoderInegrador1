@@ -36,6 +36,12 @@ class UserService {
   async restorePassword(user, hashedPassword) {
     return await this.userManager.restorePassword(user, hashedPassword);
   }
+
+  
+
+  async getUser(email) {
+    return await this.userManager.findOne({ email });
+  }
 }
 
 export default UserService;
