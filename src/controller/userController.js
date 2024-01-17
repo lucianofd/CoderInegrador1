@@ -125,7 +125,36 @@ class UserController{
   }
 
 
+  async updateUserRole(req, res){
+    try {
+      const userId = req.params.uid;
+      const newRole = req.body.role;  // nuevo rol en el cuerpo de la solicitud
 
+      // Validar si el nuevo rol es válido (por ejemplo, 'user' o 'premium')
+      if (!['user', 'premium'].includes(newRole)) {
+          return res.status(400).json({
+              status: "error",
+              message: "Invalid role.",
+          });
+      }
+
+      // Actualizar el rol del usuario
+      const updatedUser = await userService.updateUserRole(userId, newRole);
+
+      res.status(200).json({
+          status: "success",
+          data: updatedUser,
+      });
+  } catch (error) {
+      // Manejar errores
+      console.error(error);
+      res.status(500).json({
+          status: "error",
+          message: "Internal server error.",
+      });
+  }
+ }
+  
 
   //REVISAR
   async currentUser(req, res) {

@@ -41,6 +41,16 @@ class CartController {
   async addProductToCart(req, res) {
     try {
       const { cid, pid } = req.params;
+      const userEmail = req.user ? req.user.email : null;
+      
+      if (!userEmail) {
+        // El usuario no está autenticado, redirigir a la página de inicio de sesión
+        return res.status(401).send({
+          status: "error",
+          message: "Usuario no autenticado. Por favor, inicia sesión.",
+          redirectToLogin: true,
+        });
+      }
       const result = await this.cartService.addProductToCart(cid, pid);
       res.send(result);
     } catch (error) {

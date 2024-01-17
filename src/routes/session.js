@@ -23,7 +23,7 @@ sessionRouter.post("/logout", async (req, res) => sessionController.logout(req, 
 //Modificar Password
 sessionRouter.post("/restore-password", async (req, res) => userController.restorePassword(req, res));
 
-//Recuperar Password
+//Recuperar Password--/// REVISAR INPUTS EMAIL.. DEBERIA LLEGAR X PARAMS
 sessionRouter.post("/reset-password/:token", async(req, res)=> userController.resetPassword());
 
 sessionRouter.get("/current", passportCall("jwt"), authorization("user"), (req, res) => userController.currentUser(req, res));

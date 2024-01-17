@@ -42,6 +42,10 @@ class UserService {
   async getUser(email) {
     return await this.userManager.findOne({ email });
   }
+
+  async updateUserRole(userId, newRole) {
+    return userModel.findByIdAndUpdate(userId, { role: newRole }, { new: true });
+}
 }
 
 export default UserService;

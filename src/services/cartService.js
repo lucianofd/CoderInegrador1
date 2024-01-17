@@ -17,8 +17,8 @@ class CartService {
     return await this.cartManager.getCarts();
   }
 
-  async addProductToCart(cid, pid) {
-    const result = await this.cartManager.addProductToCart(cid, pid);
+  async addProductToCart(cid, pid, userEmail) {
+    const result = await this.cartManager.addProductToCart(cid, pid, userEmail);
     if (result) {
       return { status: "ok", message: "Producto agregado!" };
     } else {
