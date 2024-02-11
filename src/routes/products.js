@@ -4,7 +4,7 @@ import ProductController from '../controller/productController.js'
 
 const productsRouter = express.Router();
 const PM = new ProductManager();
-const  productController = ProductController;
+const  productController = new ProductController();
 
 
 //POST agregar un producto

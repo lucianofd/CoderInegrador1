@@ -14,9 +14,13 @@ import session from "express-session";
 import MongoStore from "connect-mongo";
 import passport from "passport";
 import initializePassport from "./config/passport.config.js";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 import loggerRouter from './src/routes/logger.js';
 import { addLogger, devLogger} from './config/logger.js';
 import DatabaseSingleton from './config/database.js';
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUIExpress from "swagger-ui-express";
 
 import ProductManager from './src/dao/ProductManager.js';
 import productsRouter from './src/routes/products.js';
@@ -27,6 +31,7 @@ import sessionRouter from './src/routes/session.js';
 import emailRouter from './src/routes/emails.js';
 import smsRouter from './src/routes/sms.js';
 import mockingRouter from './src/mocking/mockRouter.js';
+
 
 
 
@@ -72,6 +77,32 @@ app.listen(PORT, () => {
 // Middleware para el manejo de JSON en el body
 app.use(express.json());
 
+// cors
+app.use(
+  cors({
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
+
+// swagger
+
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.1",
+
+    info: {
+      title: "Documentacion API Adoptme",
+
+      description: "Documentacion del uso de las apis relacionadas.",
+    },
+  },
+
+  apis: [`./src/docs/**/*.yaml`],
+};
+
+const specs = swaggerJSDoc(swaggerOptions);
+
 
 // Configura Handlebars como motor de plantillas
 const PM = new ProductManager();
@@ -102,9 +133,9 @@ app.use('/email', emailRouter);
 app.use('/sms', smsRouter);
 app.use('/mockingproducts', mockingRouter);
 app.use("/loggerTest", loggerRouter)
-
-
-
+//swagger API endpoint
+app.use("/apidocs", swaggerUIExpress.serve, swaggerUIExpress.setup(specs));
+ 
 
 //conexion de socket
 io.on('connection', (socket) => {
