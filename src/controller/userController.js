@@ -34,6 +34,7 @@ class UserController{
     try{
 
       const clientInput = new UserInputDTO(req.body);
+      const { first_name, last_name, email, age, password, role } = clientInput;
       if (!this.isValidUserInput(clientInput)) {const customError = new CustomError({
         name: "User Creation Error",
         cause: generateUserErrorInfo({
@@ -47,25 +48,40 @@ class UserController{
         message: "Error tratando de crear el usuario",
         code: 400,
       });
-      return next(customError);
+      throw customError;
         
     }
     
-    const { first_name, last_name, email, age, password, role } = clientInput;
 
     const response = await this.userService.registerUser({
       first_name, last_name, email,age,   password,
       role
     });
 
-    return res.status(response.status === "success" ? 200 : 400).json({
-      status: response.status,
-      data: response.user,
-      redirect: response.redirect,
-    });
-    } catch (error) {
-      return next(error);
-      }
+    if (response.status === "success") {
+      // Si el registro es exitoso
+      req.flash('successMessage', '¡Registro exitoso! Bienvenido.');
+      return res.status(200).json({
+          status: response.status,
+          user: response.user,
+          //redirect: response.redirect("/login")
+      });
+  } else {
+      // Si hay algún error
+      req.flash("errorMessage", "Error en el registro: ")
+      return res.status(400).json({
+          status: response.status,
+          message: response.message,
+          //redirect:("/register")
+      });
+  }
+    } catch(error){ 
+        console.error("Error registering user:", error);
+        return res.status(500).json({
+        status: "error",
+        message: "Internal Server Error"
+       });
+     }
   }
   
   //ACTUALIZAR PASSWORD

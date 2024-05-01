@@ -23,7 +23,7 @@ class UserService {
       });
       
       if (user) {
-        return { status: "success", user, redirect: "/login" };
+        return { status: "success", user};
       } else {
         return { status: "error", message: "User with this email already exists" };
       }

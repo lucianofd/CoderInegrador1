@@ -3,6 +3,8 @@ import './config/database.js';
 import {ENV_CONFIG} from './config/config.js'
 import mongoose from 'mongoose';
 import express from "express";
+import session from "express-session";
+import flash from "express-flash";
 import __dirname from "./utils.js";
 import path from 'path';
 import { Server } from 'socket.io';
@@ -10,7 +12,6 @@ import http from 'http';
 import expressHandlebars from "express-handlebars";
 import Handlebars from "handlebars";
 import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access';
-import session from "express-session";
 import MongoStore from "connect-mongo";
 import passport from "passport";
 import initializePassport from "./config/passport.config.js";
@@ -50,6 +51,7 @@ const sessionSecret = ENV_CONFIG.SECRET_KEY || 'S3CR3T';
 const dbSingleton = DatabaseSingleton.getInstance();
 
 app.use(addLogger);
+app.use(flash());
 //Config sessions and passport
 app.use(session({
   secret: sessionSecret, 
@@ -131,7 +133,7 @@ app.use("/api/sessions/", sessionRouter);
 app.use("/", viewsRouter);
 app.use('/email', emailRouter);
 app.use('/sms', smsRouter);
-app.use('/mockingproducts', mockingRouter);
+app.use('/api/mockingproducts', mockingRouter);
 app.use("/loggerTest", loggerRouter)
 //swagger API endpoint
 app.use("/apidocs", swaggerUIExpress.serve, swaggerUIExpress.setup(specs));
