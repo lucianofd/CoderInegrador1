@@ -29,7 +29,7 @@ const CM = new CartManager();
 
 viewsRouter.get("/", async (req, res) => {
     const products = await PM.getProducts(req.query);
-    res.render("home", {products});
+    res.render( "home", {products, home:true, login: false, realtimeproducts: false});
 });
 
 viewsRouter.get("/products", async (req, res) => { 

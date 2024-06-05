@@ -12,6 +12,8 @@ import http from 'http';
 import expressHandlebars from "express-handlebars";
 import Handlebars from "handlebars";
 import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access';
+import exphbs from "express-handlebars";
+
 import MongoStore from "connect-mongo";
 import passport from "passport";
 import initializePassport from "./config/passport.config.js";
@@ -76,6 +78,7 @@ export const io = new Server(server);
 app.listen(PORT, () => {
   devLogger.info(`Servidor iniciado en el puerto ${PORT}`);
 });
+
 // Middleware para el manejo de JSON en el body
 app.use(express.json());
 
@@ -110,14 +113,27 @@ const specs = swaggerJSDoc(swaggerOptions);
 const PM = new ProductManager();
 const CM = new CartManager();
 
-app.set("views", __dirname + "/src/views"),
+/*
+// Definir el helper eq
+exphbs.helpers = {
+  eq: function(arg1, arg2, options) {
+    return arg1 === arg2 ? options.fn(this) : options.inverse(this);
+  }
+};
+*/
+// Configura Handlebars como motor de plantillas
 app.engine('handlebars', expressHandlebars.engine({
-  handlebars: allowInsecurePrototypeAccess(Handlebars)
+  handlebars: allowInsecurePrototypeAccess(Handlebars),
+  extname: "handlebars",
+  layoutsDir: __dirname + "/src/views/layouts/", // Ruta de los layouts
+  partialsDir: __dirname + "/src/views/partials/", // Ruta de los partials
 }));
-app.set("view engine", "handlebars");
 
 // Especifica la ubicación de las vistas
-//app.set('views', path.join(__dirname, 'views'));
+app.set("view engine", "handlebars");
+app.set("views", __dirname + "/src/views");
+
+// Configura el middleware para servir archivos estáticos
 app.use('/public', express.static(path.join(__dirname, 'src', 'public'), {
   setHeaders: (res, path) => {
     if (path.endsWith('.js')) {
@@ -125,6 +141,12 @@ app.use('/public', express.static(path.join(__dirname, 'src', 'public'), {
     }
   },
 }));
+
+// Middleware para el menú
+app.use((req, res, next) => {
+  res.locals.currentPage = req.path.slice(1); //Obtiene ruta actual sin el '/' inicial
+  next();
+});
 
 // routers de productos y carritos. rutas
 app.use("/api/products/", productsRouter);

@@ -13,7 +13,21 @@ const userSchema = new Schema({
         type:String,
         default:"user",
         enum:["user", "admin", "premium"]
-    }
+    },
+    documents:[
+           {
+            name: String,
+            reference: String,
+            status: {
+              type: String,
+              default: "Pending",
+            },
+          },
+    ],
+    last_connection: {
+        type: Date,
+        default: Date.now,
+      }
 });
 
 
