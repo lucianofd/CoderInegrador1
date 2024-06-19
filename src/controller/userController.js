@@ -13,49 +13,55 @@ class UserController{
   }
 
   isValidUserInput(userInput) {
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
     // Verifica que los campos requeridos
     if (!userInput.first_name || !userInput.last_name || !userInput.email || !userInput.password) {
       return false;
     }
     // Validación de formato de correo electrónico
-    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-    if (!emailRegex.test(userInput.email)) {
+    else if (!emailRegex.test(userInput.email)) {
       return false;
     }
 
     // Validación de longitud mínima de contraseña
-    if (userInput.password.length < 8) {
+    else if (userInput.password.length < 8) {
       return false;
     }
-    return true;
+    else{ return true;}
   }
-
+  
+  //REGISTER USER
   async register(req, res) {
     try{
 
       const clientInput = new UserInputDTO(req.body);
-      const { first_name, last_name, email, age, password, role } = clientInput;
-      if (!this.isValidUserInput(clientInput)) {const customError = new CustomError({
-        name: "User Creation Error",
-        cause: generateUserErrorInfo({
-          first_name,
-          last_name,
-          age,
-          email,
-          password,
-          role,
-        }),
-        message: "Error tratando de crear el usuario",
+      const { first_name, last_name, email, age, password } = clientInput;
+      
+      // Validaciones preliminares
+    if (!first_name || !last_name || !email || !age || !password) {
+      throw new CustomError({
+        name: "ValidationError",
+        message: "Todos los campos son obligatorios",
         code: 400,
+        cause: { first_name, last_name, email, age, password },
       });
-      throw customError;
-        
+    }
+
+    // Validación formato del email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new CustomError({
+        name: "ValidationError",
+        message: "El formato del email es inválido",
+        code: 400,
+        cause: { email },
+      });
     }
     
 
     const response = await this.userService.registerUser({
-      first_name, last_name, email,age,   password,
-      role
+      first_name, last_name, email,age,   password
+      
     });
 
     if (response.status === "success") {
@@ -66,7 +72,7 @@ class UserController{
           user: response.user,
           //redirect: response.redirect("/login")
       });
-  } else {
+    } else {
       // Si hay algún error
       req.flash("errorMessage", "Error en el registro: ")
       return res.status(400).json({
@@ -74,7 +80,7 @@ class UserController{
           message: response.message,
           //redirect:("/register")
       });
-  }
+    }
     } catch(error){ 
         console.error("Error registering user:", error);
         return res.status(500).json({
@@ -140,7 +146,7 @@ class UserController{
     }
   }
 
-
+  //UPDATE ROLE
   async updateUserRole(req, res){
     try {
       const userId = req.params.uid;

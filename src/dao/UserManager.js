@@ -9,20 +9,12 @@ class UserManager {
         return { status: "error", message: "User with this email already exists" };
       }
 
-      // Valida la contraseña antes de guardarla
-      if (!isValidPassword(user.password)) {
-        return { status: "error", message: "Invalid password format" };
-      }
 
       // Hash de la contraseña
       user.password = createHash(user.password);
 
-      
-      if (user.email === process.env.ADMIN_EMAIL) {
-        user.role = ROLES.ADMIN;
-      } else {
-        user.role = ROLES.USER;
-      }
+      //Verifica mail admin
+      user.role = user.email === process.env.ADMIN_EMAIL ? ROLES.ADMIN : ROLES.USER;
 
       await userModel.create(user);
       console.log("User added!");
