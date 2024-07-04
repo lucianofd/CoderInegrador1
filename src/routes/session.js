@@ -14,7 +14,7 @@ const userController = new UserController();
 const PRIVATE_KEY = ENV_CONFIG.JWT_SECRET || 'S3CR3T';
 console.log(PRIVATE_KEY);
 
-sessionRouter.post("/register", passport.authenticate("register", { failureRedirect: "/failregister" }), async (req, res) => userController.register(req, res));
+sessionRouter.post("/register",  async (req, res) => userController.register(req, res));
 
 sessionRouter.post("/login", async (req, res) => sessionController.login(req, res));
 

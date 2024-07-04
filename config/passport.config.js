@@ -35,7 +35,7 @@ const initializePassport = () => {
             return done(error);
         }
     }));
-
+    /*
     passport.use("register", new LocalStrategy(
         { passReqToCallback: true, usernameField: "email" },
         async (req, username, password, done) => {
@@ -69,7 +69,7 @@ const initializePassport = () => {
             return done(error);
         }
     }));
-
+    */
     passport.use("jwt", new JWTStrategy({
         jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor]),
         secretOrKey: ENV_CONFIG.JWT_SECRET

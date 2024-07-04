@@ -1,4 +1,4 @@
-class UsertInputDTO {
+class UserInputDTO {
     constructor({ first_name, last_name, email, age, password }) {
       this.first_name = first_name;
       this.last_name = last_name;
@@ -8,7 +8,7 @@ class UsertInputDTO {
     }
   }
   
-  export default UsertInputDTO;
+  export default UserInputDTO;
   
  
   

@@ -1,5 +1,5 @@
 import UserService from "../services/userService.js";
-import UserInputDTO from"../dao/dto/userDto.js";
+import UserInputDTO from"../dao/dto/userInputDto.js";
 import UserDtoFactory from "../dao/dto/userFactory.js";
 import CustomError from "../services/errors/CustomError.js";
 import { generateUserErrorInfo } from "../services/errors/messages/user-creat-error.js";
@@ -11,7 +11,7 @@ class UserController{
     this.userService = new UserService();
     this.userDTOFactory = new UserDtoFactory();
   }
-
+  /*
   isValidUserInput(userInput) {
     const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
     // Verifica que los campos requeridos
@@ -29,66 +29,52 @@ class UserController{
     }
     else{ return true;}
   }
-  
+  */
   //REGISTER USER
   async register(req, res) {
-    try{
+    try {
+      console.log("Request body en Controller:", req.body);
 
-      const clientInput = new UserInputDTO(req.body);
-      const { first_name, last_name, email, age, password } = clientInput;
-      
-      // Validaciones preliminares
-    if (!first_name || !last_name || !email || !age || !password) {
-      throw new CustomError({
-        name: "ValidationError",
-        message: "Todos los campos son obligatorios",
-        code: 400,
-        cause: { first_name, last_name, email, age, password },
-      });
-    }
+      const { first_name, last_name, email, age, password } = req.body;
 
-    // Validación formato del email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      throw new CustomError({
-        name: "ValidationError",
-        message: "El formato del email es inválido",
-        code: 400,
-        cause: { email },
-      });
-    }
-    
+      // Validación
+      if (!first_name || !last_name || !email || !age || !password) {
+        return res.status(400).json({
+          status: "error",
+          message: "Todos los campos son obligatorios"
+        });
+      }
 
-    const response = await this.userService.registerUser({
-      first_name, last_name, email,age,   password
-      
-    });
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          status: "error",
+          message: "El formato del email es inválido"
+        });
+      }
 
-    if (response.status === "success") {
-      // Si el registro es exitoso
-      req.flash('successMessage', '¡Registro exitoso! Bienvenido.');
-      return res.status(200).json({
-          status: response.status,
-          user: response.user,
-          //redirect: response.redirect("/login")
+      const response = await this.userService.registerUser({
+        first_name, last_name, email, age, password
       });
-    } else {
-      // Si hay algún error
-      req.flash("errorMessage", "Error en el registro: ")
-      return res.status(400).json({
-          status: response.status,
-          message: response.message,
-          //redirect:("/register")
-      });
-    }
-    } catch(error){ 
-        console.error("Error registering user:", error);
-        return res.status(500).json({
+
+      console.log("response en controller", response);
+
+      if (response.status === "success") {
+        req.flash('successMessage', '¡Registro exitoso! Bienvenido.');
+        return res.status(200).json(response);
+      } else {
+        return res.status(400).json(response);
+      }
+    } catch(error) { 
+      console.error("Error registering user:", error);
+      return res.status(500).json({
         status: "error",
-        message: "Internal Server Error"
-       });
-     }
-  }
+        message: "Error interno del servidor"
+      });
+    }  
+   }
+  
+  
   
   //ACTUALIZAR PASSWORD
   async restorePassword(req, res) {

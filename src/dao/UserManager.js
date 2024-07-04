@@ -2,28 +2,28 @@ import  userModel  from "../models/user.model.js";
 import { createHash } from "../../utils.js";
 
 class UserManager {
+
+
+  async findOne(email) {
+    try {
+      const user = await userModel.findOne({ email });
+      console.log("Resultado de búsqueda de usuario:", user);
+      return user;
+    } catch (error) {
+      console.error("Error fetching user by email:", error.message);
+      throw error;
+    }
+  }
   async addUser(user) {
     try {
-      const existingUser = await userModel.findOne({ email: user.email });
-      if (existingUser) {
-        return { status: "error", message: "User with this email already exists" };
-      }
-
-
-      // Hash de la contraseña
-      user.password = createHash(user.password);
-
-      //Verifica mail admin
-      user.role = user.email === process.env.ADMIN_EMAIL ? ROLES.ADMIN : ROLES.USER;
-
-      await userModel.create(user);
-      console.log("User added!");
-
-      return { status: "success", message: "User added successfully" };
+      const newUser = await userModel.create(user);
+      console.log("Usuario añadido:", newUser);
+      return { status: "success", user: newUser };
     } catch (error) {
       console.error("Error adding user:", error.message);
       throw error;
     }
+  
   }
 
   async login(userEmail) {
@@ -98,31 +98,17 @@ class UserManager {
     }
   }
   
-
-  async findOne() {
-    try {
-      const existingUser = await userModel.findOne({ email });
-
-      if (existingUser) {
-        return { status: "success", user: existingUser };
-      } else {
-        return { status: "error", message: "User not found" };
-      }
-    } catch (error) {
-      console.error("Error while getting user:", error);
-      throw error;
-    }
-  }
+  
 }
 //  para los roles
-const ROLES = {
+ const ROLES = {
   ADMIN: "admin",
   USER: "user",
   PREMIUM: "premium"
  };
 
 // Función para validar la contraseña 
-function isValidPassword(password) {
+ function isValidPassword(password) {
     // Verifica la longitud mínima
     if (password.length < 6) {
       return false;
